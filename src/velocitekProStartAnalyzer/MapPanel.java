@@ -54,7 +54,7 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
      // Listen to the map viewer for user operations so components will
      // receive events and update
      map().addJMVListener(this);
-
+     map().setMapMarkerVisible(false);
      setLayout(new BorderLayout());
     
      JPanel panel = new JPanel(new BorderLayout());
@@ -79,7 +79,7 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
      button.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(ActionEvent e) {
-             map().setDisplayToFitMapMarkers();
+             map().setDisplayToFitMapMarkers();             
          }
      });
      JComboBox<TileSource> tileSourceSelector = new JComboBox<>(new TileSource[] {
@@ -114,14 +114,14 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
      });
      panelBottom.add(showMapMarker);
      ///
-     final JCheckBox showTreeLayers = new JCheckBox("Tree Layers visible");
+    /* final JCheckBox showTreeLayers = new JCheckBox("Tree Layers visible");
      showTreeLayers.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(ActionEvent e) {
              treeMap.setTreeVisible(showTreeLayers.isSelected());
          }
      });
-     panelBottom.add(showTreeLayers);
+     panelBottom.add(showTreeLayers);*/
      ///
      final JCheckBox showToolTip = new JCheckBox("ToolTip visible");
      showToolTip.addActionListener(new ActionListener() {
@@ -150,14 +150,14 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
          }
      });
      panelBottom.add(showZoomControls);
-     final JCheckBox scrollWrapEnabled = new JCheckBox("Scrollwrap enabled");
+    /* final JCheckBox scrollWrapEnabled = new JCheckBox("Scrollwrap enabled");
      scrollWrapEnabled.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(ActionEvent e) {
              map().setScrollWrapEnabled(scrollWrapEnabled.isSelected());
          }
      });
-     panelBottom.add(scrollWrapEnabled);
+     panelBottom.add(scrollWrapEnabled);*/
      panelBottom.add(button);
 
      panelTop.add(zoomLabel);

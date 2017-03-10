@@ -16,7 +16,7 @@ import org.w3c.dom.NodeList;
 	  public void ReadXmlFile(String filePath) {
 		  JDBCPointDao jdbcPointDao = new JDBCPointDao();
 		  PointDto pointDto = new PointDto();
-			jdbcPointDao.getConnection();
+		  jdbcPointDao.getConnection(MainWindow.dbName);
 			jdbcPointDao.delete();
 	    try {
 	    	

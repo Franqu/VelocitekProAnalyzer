@@ -19,13 +19,13 @@ public class JDBCPointDao implements PointDao {
 	
 	private static List<Coordinate> mapPointsListCoords = new ArrayList<Coordinate>();
 	
-    Connection connection = null;
+    private Connection connection = null;
     final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
-    public Connection getConnection(){
+    public Connection getConnection(String fileName){
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("org.sqlite.JDBC");
             if(connection == null)
-                connection = DriverManager.getConnection("jdbc:mysql://localhost/vel_data?user=root&password=qwertyuiop");
+                connection = DriverManager.getConnection("jdbc:sqlite:" + fileName);
  
         } catch (ClassNotFoundException e) {
  
@@ -38,6 +38,29 @@ public class JDBCPointDao implements PointDao {
         }
         return connection;
     }
+    	
+    	/*Connection conn = null;
+        try {
+            // db parameters
+            String url = "jdbc:sqlite:" + fileName;
+            // create a connection to the database
+            connection = DriverManager.getConnection(url);
+            
+            System.out.println("Connection to SQLite has been established.");
+            
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            try {
+                if (connection != null) {
+                	connection.close();
+                }
+            } catch (SQLException ex) {
+                System.out.println(ex.getMessage());
+            }
+        }
+    	return connection;
+    }*/
    
   
 	@Override
@@ -48,13 +71,13 @@ public class JDBCPointDao implements PointDao {
         List<PointDto> points = new ArrayList<>();
          try {
                 Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery("SELECT * FROM vel_data.point_data");
+                ResultSet resultSet = statement.executeQuery("SELECT * FROM point_data;");
                  
                
                 while(resultSet.next()){
                 	PointDto pointDto = new PointDto();
                     pointDto.setPointID(Integer.parseInt(resultSet.getString("idpoint_data")));
-                    pointDto.setPointDate(resultSet.getString("point_date"));
+                    pointDto.setPointDate(resultSet.getString("point_date").substring(0, 10) + " " + resultSet.getString("point_date").substring(11, resultSet.getString("point_date").length() - 6));
                     pointDto.setPointHeading(resultSet.getDouble("point_heading"));
                     pointDto.setPointSpeed(resultSet.getDouble("point_speed"));
                     pointDto.setPointLatidude(resultSet.getDouble("point_latitude"));
@@ -64,12 +87,11 @@ public class JDBCPointDao implements PointDao {
                     MainWindow.getMapPanel().map().addMapMarker(mapPoint);                  
                     Coordinate mapCoordForList = new Coordinate(pointDto.getPointLatidude(),pointDto.getPointLongtidude());	
                     mapPointsListCoords.add(mapCoordForList);
-                    
-                    
                     points.add(pointDto);
                 }
                 resultSet.close();
                 statement.close();
+                connection.close();
                  
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -94,25 +116,31 @@ public class JDBCPointDao implements PointDao {
               if (connection != null) {
                   connection.close();
               }
-            } catch (Exception e) { 
+            }
+        
+        catch (Exception e) { 
             	 e.printStackTrace();
             }
+        
     }
 
 	@Override
 	public void insert(PointDto pointDto) {
 		
         try {
-               Statement statement = connection.createStatement();
-               statement.executeUpdate("INSERT INTO vel_data.point_data (point_date, point_heading, point_speed, point_latitude, point_longitude) " + "VALUES ("
-                   +"'"+pointDto.getPointDate()+"',"
-                   +"'"+pointDto.getPointHeading()+"',"
-                   +"'"+pointDto.getPointSpeed()+"',"
-        		   +"'"+pointDto.getPointLatidude()+"',"
-                   +"'"+pointDto.getPointLongtidude()+"'"
-        		   +")");
-                
+	    		connection.setAutoCommit(false);
+	    		Statement statement = connection.createStatement();
+    			statement.executeUpdate("INSERT INTO point_data (point_date, point_heading, point_speed, point_latitude, point_longitude) " + "VALUES ("
+	               +"'"+pointDto.getPointDate()+"',"
+	               +"'"+pointDto.getPointHeading()+"',"
+	               +"'"+pointDto.getPointSpeed()+"',"
+	    		   +"'"+pointDto.getPointLatidude()+"',"
+	               +"'"+pointDto.getPointLongtidude()+"'"
+	    		   +");");
+               
                statement.close();
+               connection.commit();
+            //   connection.close();
                 
            } catch (SQLException e) {
                e.printStackTrace();
@@ -124,7 +152,8 @@ public class JDBCPointDao implements PointDao {
 	public void delete() {
 		 try {
 		 Statement statement = connection.createStatement();
-		 statement.executeUpdate("truncate  vel_data.point_data");
+		 statement.executeUpdate("DELETE FROM point_data;");
+		 statement.executeUpdate("VACUUM;");
 		 } catch (SQLException e) {
              e.printStackTrace();
 		 }

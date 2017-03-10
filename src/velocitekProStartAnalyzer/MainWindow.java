@@ -41,6 +41,7 @@ public class MainWindow {
 	private JLabel statusLabel = new JLabel();
 	private JPanel graphPanel = new JPanel(new BorderLayout());
 	private static MapPanel mapPanel = new MapPanel();
+	static String dbName = "VelocitekProAnalyzerDB.db";
 	
 	public static MapPanel getMapPanel() {
 		return mapPanel;
@@ -115,7 +116,7 @@ public class MainWindow {
         final JFreeChart chart = ChartFactory.createLineChart(
             "Speed at certain point of route",       // chart title
             "Position in route",                    // domain axis label
-            "Speed",                   // range axis label
+            "Speed (kn)",                   // range axis label
             dataset,                   // data
             PlotOrientation.VERTICAL,  // orientation
             false,                      // include legend
@@ -125,16 +126,16 @@ public class MainWindow {
         return chart;
 	}
 	private void initialize() {
-		//JDBCPointDao jdbcPointDao = new JDBCPointDao();
+		JDBCPointDao jdbcPointDao = new JDBCPointDao();
+		//SQLiteDB.createNewDatabase(dbName);
+		jdbcPointDao.getConnection(dbName);
+		SQLiteDB.createNewTable(dbName);
+		
 		frame = new JFrame();
 		frame.setBounds(1, 1, 1280, 720);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
 		setScrollTable(new JScrollPane());
-		
-		
-		
-	
 		
 		btnPanel = new JPanel();
 		frame.getContentPane().add(btnPanel, BorderLayout.NORTH);
@@ -164,7 +165,7 @@ public class MainWindow {
 		
 		graphMapSplitPanel.setLeftComponent(graphPanel);
 		
-		mapPanel.setVisible(true);
+		//mapPanel.setVisible(true);
 		graphMapSplitPanel.setRightComponent(mapPanel);
 		
 		
@@ -184,7 +185,7 @@ public class MainWindow {
 		mapPanel.map().removeAllMapMarkers();
 		mapPanel.map().removeAllMapRectangles();
 		JDBCPointDao jdbcPointDao = new JDBCPointDao();
-	    jdbcPointDao.getConnection();
+		jdbcPointDao.getConnection(dbName);
 		pointTable.setModel(buildTableModel(jdbcPointDao.select()));
 		jdbcPointDao.closeConnection();
 		MapPolygon routePolygon = new MapPolygonImpl(JDBCPointDao.getMapPointsListCoords());
@@ -220,11 +221,11 @@ public class MainWindow {
 	            {
 	            readXmlFile.ReadXmlFile(file.getPath());
 	            loadDataFromDB();
-	            statusLabel.setText("File Selected :" + file.getName());
+	            statusLabel.setText("File Loaded :" + file.getName());
 	            }
 	            else
 	            {
-	            	statusLabel.setText("Please select .vcc file");
+	            	statusLabel.setText("Please select a .vcc file");
 	            }
 	         } else {
 	            statusLabel.setText("Open command cancelled by user." );           

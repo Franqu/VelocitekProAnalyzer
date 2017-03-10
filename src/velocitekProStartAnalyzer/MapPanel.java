@@ -75,7 +75,7 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
      JLabel helpLabel = new JLabel("Use right mouse button to move,\n "
              + "left double click or mouse wheel to zoom.");
      helpPanel.add(helpLabel);
-     JButton button = new JButton("Center Display To Route");
+     JButton button = new JButton("Center Display On Route");
      button.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(ActionEvent e) {

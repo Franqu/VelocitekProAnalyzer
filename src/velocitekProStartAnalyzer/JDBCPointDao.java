@@ -18,7 +18,7 @@ import org.openstreetmap.gui.jmapviewer.MapMarkerDot;
 
 public class JDBCPointDao implements PointDao {
 	
-	private static List<Coordinate> mapPointsListCoords = new ArrayList<Coordinate>();
+	 List<Coordinate> mapPointsListCoords = new ArrayList<Coordinate>();
 	
     private Connection connection = null;
     final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
@@ -102,14 +102,7 @@ public class JDBCPointDao implements PointDao {
     }
      
      
-    public static List<Coordinate> getMapPointsListCoords() {
-		return mapPointsListCoords;
-	}
-
-
-	public static void setMapPointsListCoords(List<Coordinate> mapPointsListCoords) {
-		JDBCPointDao.mapPointsListCoords = mapPointsListCoords;
-	}
+   
 
 
 	public void closeConnection(){
@@ -136,6 +129,7 @@ public class JDBCPointDao implements PointDao {
 	    		stmt.setDouble(2, pointDto.getPointHeading());
 	    		stmt.setDouble(3, pointDto.getPointSpeed());
 	    		stmt.setDouble(4, pointDto.getPointLatidude());
+	    		stmt.setDouble(5, pointDto.getPointLongtidude());
 	
 	    		stmt.executeUpdate();
 	    		stmt.close();

@@ -24,8 +24,6 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.CategoryDataset;
-import org.openstreetmap.gui.jmapviewer.MapPolygonImpl;
-import org.openstreetmap.gui.jmapviewer.interfaces.MapPolygon;
 public class MainWindow {
 	
 	private JFrame frame;
@@ -177,10 +175,9 @@ public class MainWindow {
 		showFileChooser();
 		loadDataFromDB();
 		
-		
 	}
 	private void loadDataFromDB(){
-		JDBCPointDao.getMapPointsListCoords().clear();
+		
 		mapPanel.map().removeAllMapPolygons();
 		mapPanel.map().removeAllMapMarkers();
 		mapPanel.map().removeAllMapRectangles();
@@ -188,9 +185,9 @@ public class MainWindow {
 		jdbcPointDao.getConnection(dbName);
 		pointTable.setModel(buildTableModel(jdbcPointDao.select()));
 		jdbcPointDao.closeConnection();
-		MapPolygon routePolygon = new MapPolygonImpl(JDBCPointDao.getMapPointsListCoords());
-	
-		mapPanel.map().addMapPolygon(routePolygon);
+		//MapPolygon routePolygon = new MapPolygonImpl(JDBCPointDao.getMapPointsListCoords());
+		MapPolyline routePolyline = new MapPolyline(jdbcPointDao.mapPointsListCoords);
+		mapPanel.map().addMapPolygon(routePolyline);
 		mapPanel.revalidate();
 		CategoryDataset dataset = jdbcPointDao.dataSet;
 	    JFreeChart chart = createChart(dataset);
@@ -203,7 +200,7 @@ public class MainWindow {
 	    graphPanel.add(chartPanel, BorderLayout.CENTER);
 	    graphPanel.revalidate();
 	    graphMapSplitPanel.revalidate();
-	    
+	   
 }
 	private void showFileChooser(){
    
@@ -213,6 +210,7 @@ public class MainWindow {
 	   btnShowFileDialogButton.addActionListener(new ActionListener() {
 	      @Override
 	      public void actionPerformed(ActionEvent e) {
+	    	  statusLabel.setText("Loading file..." );
 	         int returnVal = fileDialog.showOpenDialog(frame);
 	         
 	         if (returnVal == JFileChooser.APPROVE_OPTION) {

@@ -2,6 +2,7 @@ package velocitekProStartAnalyzer;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -129,17 +130,16 @@ public class JDBCPointDao implements PointDao {
 		
         try {
 	    		connection.setAutoCommit(false);
-	    		Statement statement = connection.createStatement();
-    			statement.executeUpdate("INSERT INTO point_data (point_date, point_heading, point_speed, point_latitude, point_longitude) " + "VALUES ("
-	               +"'"+pointDto.getPointDate()+"',"
-	               +"'"+pointDto.getPointHeading()+"',"
-	               +"'"+pointDto.getPointSpeed()+"',"
-	    		   +"'"+pointDto.getPointLatidude()+"',"
-	               +"'"+pointDto.getPointLongtidude()+"'"
-	    		   +");");
-               
-               statement.close();
-               connection.commit();
+	    		
+	    		PreparedStatement stmt=connection.prepareStatement("INSERT INTO point_data (point_date, point_heading, point_speed, point_latitude, point_longitude) VALUES (?,?,?,?,?);");
+	    		stmt.setString(1, pointDto.getPointDate());
+	    		stmt.setDouble(2, pointDto.getPointHeading());
+	    		stmt.setDouble(3, pointDto.getPointSpeed());
+	    		stmt.setDouble(4, pointDto.getPointLatidude());
+	
+	    		stmt.executeUpdate();
+	    		stmt.close();
+           		connection.commit();
             //   connection.close();
                 
            } catch (SQLException e) {

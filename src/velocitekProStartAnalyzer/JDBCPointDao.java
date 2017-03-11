@@ -11,8 +11,6 @@ import java.util.List;
 
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
-import org.openstreetmap.gui.jmapviewer.Layer;
-import org.openstreetmap.gui.jmapviewer.LayerGroup;
 import org.openstreetmap.gui.jmapviewer.MapMarkerDot;	
  
 
@@ -20,7 +18,7 @@ public class JDBCPointDao implements PointDao {
 	
 	 List<Coordinate> mapPointsListCoords = new ArrayList<Coordinate>();
 	
-    private Connection connection = null;
+     Connection connection = null;
     final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
     public Connection getConnection(String fileName){
         try {
@@ -66,9 +64,7 @@ public class JDBCPointDao implements PointDao {
   
 	@Override
     public List<PointDto> select() {
-		
-    	LayerGroup germanyGroup = new LayerGroup("Route");
-    	Layer germanyWestLayer = germanyGroup.addLayer("Route");
+		    	
         List<PointDto> points = new ArrayList<>();
          try {
                 Statement statement = connection.createStatement();
@@ -84,7 +80,7 @@ public class JDBCPointDao implements PointDao {
                     pointDto.setPointLatidude(resultSet.getDouble("point_latitude"));
                     pointDto.setPointLongtidude(resultSet.getDouble("point_longitude"));
                     dataSet.addValue((Number)  pointDto.getPointSpeed(),"Point ID" ,pointDto.getPointID());
-                    MapMarkerDot mapPoint = new MapMarkerDot(germanyWestLayer,  Integer.toString(pointDto.getPointID()), pointDto.getPointLatidude(), pointDto.getPointLongtidude());                     
+                    MapMarkerDot mapPoint = new MapMarkerDot(null,  Integer.toString(pointDto.getPointID()), pointDto.getPointLatidude(), pointDto.getPointLongtidude());                     
                     MainWindow.getMapPanel().map().addMapMarker(mapPoint);                  
                     Coordinate mapCoordForList = new Coordinate(pointDto.getPointLatidude(),pointDto.getPointLongtidude());	
                     mapPointsListCoords.add(mapCoordForList);
@@ -133,7 +129,7 @@ public class JDBCPointDao implements PointDao {
 	
 	    		stmt.executeUpdate();
 	    		stmt.close();
-           		connection.commit();
+           		//connection.commit();
             //   connection.close();
                 
            } catch (SQLException e) {

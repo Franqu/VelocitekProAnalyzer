@@ -52,8 +52,10 @@ import org.w3c.dom.NodeList;
 	    			jdbcPointDao.insert(pointDto);
 	    		}
 	    	}
+	    	jdbcPointDao.connection.commit();
 	        } catch (Exception e) {
 	    	System.out.println(e.getMessage());
+	    	
 	    	 jdbcPointDao.closeConnection();
 	        }
 

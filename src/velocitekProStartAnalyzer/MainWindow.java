@@ -63,6 +63,12 @@ public class MainWindow {
 				}
 			}
 		});
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				mapPanel.map().setDisplayToFitMapMarkers();
+				}
+		});
+		
 	}
 
 	/**
@@ -70,6 +76,7 @@ public class MainWindow {
 	 */
 	public MainWindow() {
 		initialize();
+		
 		
 	}
 
@@ -160,15 +167,11 @@ public class MainWindow {
 		graphMapSplitPanel.setResizeWeight(.5d);
 		frame.getContentPane().add(graphMapSplitPanel, BorderLayout.CENTER);
 		
-		
 		graphMapSplitPanel.setLeftComponent(graphPanel);
 		
 		//mapPanel.setVisible(true);
 		graphMapSplitPanel.setRightComponent(mapPanel);
 		
-		
-		
-		  
 		btnPanel.add(statusLabel);
 		statusLabel.setVisible(true);
 		//frame.add(statusLabel);
@@ -189,6 +192,9 @@ public class MainWindow {
 		MapPolyline routePolyline = new MapPolyline(jdbcPointDao.mapPointsListCoords);
 		mapPanel.map().addMapPolygon(routePolyline);
 		mapPanel.revalidate();
+		mapPanel.map().setDisplayToFitMapMarkers();   
+		mapPanel.validate();
+		
 		CategoryDataset dataset = jdbcPointDao.dataSet;
 	    JFreeChart chart = createChart(dataset);
 	    ChartPanel chartPanel = new ChartPanel(chart);

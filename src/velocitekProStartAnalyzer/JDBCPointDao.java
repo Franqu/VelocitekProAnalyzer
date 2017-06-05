@@ -16,8 +16,8 @@ import org.openstreetmap.gui.jmapviewer.MapMarkerDot;
 
 public class JDBCPointDao implements PointDao {
 	
-	 List<Coordinate> mapPointsListCoords = new ArrayList<Coordinate>();
-	
+	 static List<Coordinate> mapPointsListCoords = new ArrayList<Coordinate>();
+	 static List<PointDto> points = new ArrayList<>();
      Connection connection = null;
     final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
     public Connection getConnection(String fileName){
@@ -65,7 +65,7 @@ public class JDBCPointDao implements PointDao {
 	@Override
     public List<PointDto> select() {
 		    	
-        List<PointDto> points = new ArrayList<>();
+        
          try {
                 Statement statement = connection.createStatement();
                 ResultSet resultSet = statement.executeQuery("SELECT * FROM point_data;");

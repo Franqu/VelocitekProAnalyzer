@@ -25,6 +25,7 @@ import org.openstreetmap.gui.jmapviewer.JMapViewerTree;
 import org.openstreetmap.gui.jmapviewer.OsmTileLoader;
 import org.openstreetmap.gui.jmapviewer.events.JMVCommandEvent;
 import org.openstreetmap.gui.jmapviewer.interfaces.JMapViewerEventListener;
+import org.openstreetmap.gui.jmapviewer.interfaces.MapPolygon;
 import org.openstreetmap.gui.jmapviewer.interfaces.TileLoader;
 import org.openstreetmap.gui.jmapviewer.interfaces.TileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.BingAerialTileSource;
@@ -179,14 +180,17 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
      map().addMouseMotionListener(new MouseAdapter() {
          @Override
          public void mouseMoved(MouseEvent e) {
-             Point p = e.getPoint();
-             boolean cursorHand = map().getAttribution().handleAttributionCursor(p);
+        	 Point p = e.getPoint();
+        	 PointDto pointDto = new PointDto();
+        	 pointDto = JDBCPointDao.points.get(4);
+        	 boolean cursorHand = map().getAttribution().handleAttributionCursor(p);
              if (cursorHand) {
                  map().setCursor(new Cursor(Cursor.HAND_CURSOR));
              } else {
                  map().setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
              }
-             if (showToolTip.isSelected()) map().setToolTipText(map().getPosition(p).toString());
+             if (showToolTip.isSelected() && map().getMapMarkerList().contains(JDBCPointDao.mapPointsListCoords))
+            	 map().setToolTipText(Integer.toString(pointDto.getPointID())+" razdwa "+ pointDto.getPointDate());
          }
      });
  }
@@ -194,7 +198,7 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
  JMapViewer map() {
      return treeMap.getViewer();
  }
-
+ 
  private void updateZoomParameters() {
      if (mperpLabelValue != null)
          mperpLabelValue.setText(String.format("%s", map().getMeterPerPixel()));

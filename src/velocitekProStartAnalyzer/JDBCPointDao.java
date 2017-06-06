@@ -80,7 +80,7 @@ public class JDBCPointDao implements PointDao {
                     pointDto.setPointLatidude(resultSet.getDouble("point_latitude"));
                     pointDto.setPointLongtidude(resultSet.getDouble("point_longitude"));
                     dataSet.addValue((Number)  pointDto.getPointSpeed(),"Point ID" ,pointDto.getPointID());
-                    MapMarkerDot mapPoint = new MapMarkerDot(null,  Integer.toString(pointDto.getPointID()), pointDto.getPointLatidude(), pointDto.getPointLongtidude());                     
+                    MapMarkerDot mapPoint = new MapMarkerDot(null,  null, pointDto.getPointLatidude(), pointDto.getPointLongtidude());                     
                     MainWindow.getMapPanel().map().addMapMarker(mapPoint);                  
                     Coordinate mapCoordForList = new Coordinate(pointDto.getPointLatidude(),pointDto.getPointLongtidude());	
                     mapPointsListCoords.add(mapCoordForList);

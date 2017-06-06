@@ -3,6 +3,8 @@ package velocitekProStartAnalyzer;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
@@ -17,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.JViewport;
 import javax.swing.table.DefaultTableModel;
 
 import org.jfree.chart.ChartFactory;
@@ -30,7 +33,7 @@ public class MainWindow {
 	private JButton btnLoadRouteData;
 	JButton btnShowFileDialogButton = new JButton("Open File");
 	//private JDBCPointDao jdbcPointDao; 
-	private JTable pointTable;
+	static JTable pointTable;
 	private JPanel btnPanel;
 	private JScrollPane scrollTable;
 	private JPanel tablePanel;
@@ -189,7 +192,7 @@ public class MainWindow {
 		pointTable.setModel(buildTableModel(jdbcPointDao.select()));
 		jdbcPointDao.closeConnection();
 		//MapPolygon routePolygon = new MapPolygonImpl(JDBCPointDao.getMapPointsListCoords());
-		MapPolyline routePolyline = new MapPolyline(jdbcPointDao.mapPointsListCoords);
+		MapPolyline routePolyline = new MapPolyline(JDBCPointDao.mapPointsListCoords);
 		mapPanel.map().addMapPolygon(routePolyline);
 		mapPanel.revalidate();
 		mapPanel.map().setDisplayToFitMapMarkers();   
@@ -239,6 +242,7 @@ public class MainWindow {
   // btnPanel.add(showFileDialogButton);
      
 }
+	
 
 
 public JScrollPane getScrollTable() {

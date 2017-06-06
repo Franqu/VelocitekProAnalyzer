@@ -6,6 +6,7 @@ package velocitekProStartAnalyzer;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
+import java.awt.Event;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,19 +23,23 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
-import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.JMapViewerTree;
 import org.openstreetmap.gui.jmapviewer.OsmTileLoader;
 import org.openstreetmap.gui.jmapviewer.events.JMVCommandEvent;
 import org.openstreetmap.gui.jmapviewer.interfaces.ICoordinate;
 import org.openstreetmap.gui.jmapviewer.interfaces.JMapViewerEventListener;
-import org.openstreetmap.gui.jmapviewer.interfaces.MapPolygon;
 import org.openstreetmap.gui.jmapviewer.interfaces.TileLoader;
 import org.openstreetmap.gui.jmapviewer.interfaces.TileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.BingAerialTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
+
+import com.sun.glass.events.KeyEvent;
+import com.sun.java.swing.SwingUtilities3;
+
+import sun.swing.SwingUtilities2;
 
 
 public class MapPanel extends JPanel implements JMapViewerEventListener {
@@ -216,7 +221,74 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
              }
          }
      });
+     map().addMouseListener(new MouseAdapter() {
+    	 @Override
+    	 public void mousePressed(MouseEvent e){
+    		 
+    		 Point p = e.getPoint();
+        	 ICoordinate c = map().getPosition(p);
+        	 DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.ENGLISH);
+        	 otherSymbols.setDecimalSeparator('.');       
+        	 boolean cursorHand = map().getAttribution().handleAttributionCursor(p);
+             if (cursorHand) {
+                 map().setCursor(new Cursor(Cursor.HAND_CURSOR));
+             } else {
+                 map().setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+             }
+             
+             if(SwingUtilities.isLeftMouseButton(e) && e.isShiftDown()){                   
+            	 for (PointDto cord : JDBCPointDao.points) {
+					if(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(c.getLat())))   
+							&& Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(c.getLon()))))
+					{
+						if(MainWindow.pointTable.getSelectionModel() == null){
+							MainWindow.pointTable.addRowSelectionInterval(cord.getPointID()-1,cord.getPointID()-1);
+							//map().getMapMarkerList().get(cord.getPointID()).getColor().getBlue();
+						}
+						else{
+							MainWindow.pointTable.addRowSelectionInterval(MainWindow.pointTable.getSelectedRow(),cord.getPointID()-1);
+						}
+						
+						MainWindow.pointTable.scrollRectToVisible(MainWindow.pointTable.getCellRect(cord.getPointID()-1, 0, true));
+					}   						
+            	 }      
+             }
+             else if(SwingUtilities.isLeftMouseButton(e) && e.isControlDown()){                   
+            	 for (PointDto cord : JDBCPointDao.points) {
+					if(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(c.getLat())))   
+							&& Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(c.getLon()))))
+					{
+						if(MainWindow.pointTable.getSelectionModel() == null){
+							continue;
+						}    						
+						MainWindow.pointTable.removeRowSelectionInterval(cord.getPointID()-1,cord.getPointID()-1);
+						MainWindow.pointTable.scrollRectToVisible(MainWindow.pointTable.getCellRect(cord.getPointID()-1, 0, true));
+						//MainWindow.pointTable.revalidate();    						
+					}   						
+            	 }                    			 
+		 }
+             else if(SwingUtilities.isLeftMouseButton(e)){                   
+                	 for (PointDto cord : JDBCPointDao.points) {
+    					if(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(c.getLat())))   
+    							&& Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(c.getLon()))))
+    					{
+    						if(MainWindow.pointTable.getSelectionModel() != null){
+    							MainWindow.pointTable.getSelectionModel().clearSelection();
+    						}    						
+    						MainWindow.pointTable.setRowSelectionInterval(cord.getPointID()-1,cord.getPointID()-1);
+    						MainWindow.pointTable.scrollRectToVisible(MainWindow.pointTable.getCellRect(cord.getPointID()-1, 0, true));
+    						//MainWindow.pointTable.revalidate();    						
+    					}   						
+                	 }                    			 
+    		 }
+    	 }
+    		 
+    		
+	});;
+     
  }
+ 
+ 
 
  JMapViewer map() {
      return treeMap.getViewer();

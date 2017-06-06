@@ -69,6 +69,7 @@ public class MainWindow {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				mapPanel.map().setDisplayToFitMapMarkers();
+				System.out.println(pointTable.isCellEditable(3, 3)); 
 				}
 		});
 		
@@ -160,7 +161,15 @@ public class MainWindow {
 		btnPanel.add(btnShowFileDialogButton);
 	
 		pointTable = new JTable();		
-		pointTable.setEnabled(false);
+		pointTable.setEnabled(true);
+		pointTable.setModel(new DefaultTableModel(){
+			@Override
+			public boolean isCellEditable(int row, int column) {
+			       return false;
+			    }
+		});
+	
+		pointTable.setRowSelectionAllowed(true);
 		tableContainer = new JScrollPane(pointTable);
 		tableContainer.setPreferredSize(new Dimension(250,250));
 		

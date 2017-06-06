@@ -1,10 +1,13 @@
 package velocitekProStartAnalyzer;
 
 
+import java.awt.BasicStroke;
+
 //License: GPL. For details, see Readme.txt file.
 
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Event;
 import java.awt.Point;
@@ -27,10 +30,14 @@ import javax.swing.SwingUtilities;
 
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.JMapViewerTree;
+import org.openstreetmap.gui.jmapviewer.Layer;
+import org.openstreetmap.gui.jmapviewer.MapPolygonImpl;
 import org.openstreetmap.gui.jmapviewer.OsmTileLoader;
+import org.openstreetmap.gui.jmapviewer.Style;
 import org.openstreetmap.gui.jmapviewer.events.JMVCommandEvent;
 import org.openstreetmap.gui.jmapviewer.interfaces.ICoordinate;
 import org.openstreetmap.gui.jmapviewer.interfaces.JMapViewerEventListener;
+import org.openstreetmap.gui.jmapviewer.interfaces.MapPolygon;
 import org.openstreetmap.gui.jmapviewer.interfaces.TileLoader;
 import org.openstreetmap.gui.jmapviewer.interfaces.TileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.BingAerialTileSource;
@@ -225,6 +232,14 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
     	 @Override
     	 public void mousePressed(MouseEvent e){
     		 
+    		 Layer global = new Layer("Global");
+    		    Style style = new Style();
+    		    Color color = new Color(0x1d41f7, true);
+    		    style.setBackColor(color);
+    		    style.setColor(color);
+    		    style.setStroke(new BasicStroke(0));
+    		   
+    		 
     		 Point p = e.getPoint();
         	 ICoordinate c = map().getPosition(p);
         	 DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.ENGLISH);
@@ -242,11 +257,11 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
 							&& Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(c.getLon()))))
 					{
 						if(MainWindow.pointTable.getSelectionModel() == null){
-							MainWindow.pointTable.addRowSelectionInterval(cord.getPointID()-1,cord.getPointID()-1);
-							//map().getMapMarkerList().get(cord.getPointID()).getColor().getBlue();
+							MainWindow.pointTable.setRowSelectionInterval(cord.getPointID()-1,cord.getPointID()-1);	
 						}
 						else{
 							MainWindow.pointTable.addRowSelectionInterval(MainWindow.pointTable.getSelectedRow(),cord.getPointID()-1);
+							
 						}
 						
 						MainWindow.pointTable.scrollRectToVisible(MainWindow.pointTable.getCellRect(cord.getPointID()-1, 0, true));

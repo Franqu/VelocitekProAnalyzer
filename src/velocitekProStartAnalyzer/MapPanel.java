@@ -13,6 +13,9 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -20,10 +23,12 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.JMapViewerTree;
 import org.openstreetmap.gui.jmapviewer.OsmTileLoader;
 import org.openstreetmap.gui.jmapviewer.events.JMVCommandEvent;
+import org.openstreetmap.gui.jmapviewer.interfaces.ICoordinate;
 import org.openstreetmap.gui.jmapviewer.interfaces.JMapViewerEventListener;
 import org.openstreetmap.gui.jmapviewer.interfaces.MapPolygon;
 import org.openstreetmap.gui.jmapviewer.interfaces.TileLoader;
@@ -181,16 +186,34 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
          @Override
          public void mouseMoved(MouseEvent e) {
         	 Point p = e.getPoint();
-        	 PointDto pointDto = new PointDto();
-        	 pointDto = JDBCPointDao.points.get(4);
+        	 ICoordinate c = map().getPosition(p);
+        	 DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.ENGLISH);
+        	 otherSymbols.setDecimalSeparator('.');        	 
+        	 //PointDto pointDto = new PointDto();
+        	 //pointDto = JDBCPointDao.points.get(4);
         	 boolean cursorHand = map().getAttribution().handleAttributionCursor(p);
              if (cursorHand) {
                  map().setCursor(new Cursor(Cursor.HAND_CURSOR));
              } else {
                  map().setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
              }
-             if (showToolTip.isSelected() && map().getMapMarkerList().contains(JDBCPointDao.mapPointsListCoords))
-            	 map().setToolTipText(Integer.toString(pointDto.getPointID())+" razdwa "+ pointDto.getPointDate());
+             if (showToolTip.isSelected()/* || map().getMapMarkerList().contains(JDBCPointDao.mapPointsListCoords)*/)
+             {
+            	 for (PointDto cord : JDBCPointDao.points) {
+/*            		 String TEST = new DecimalFormat("#.####",otherSymbols).format(cord.getPointLatidude());
+            		 System.out.println(TEST);*/
+					if(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(c.getLat())))   
+							&& Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(c.getLon()))) )
+						map().setToolTipText(
+						"ID: "+Integer.toString(cord.getPointID())
+						+" Lat: " + cord.getPointLatidude()
+						+" Lon: " + cord.getPointLongtidude()
+						+" Speed: "+ cord.getPointSpeed()
+						+" Heading: " + cord.getPointHeading()
+						+ " Hour: " + cord.getPointDate().substring(11)
+						);
+            	 }
+             }
          }
      });
  }

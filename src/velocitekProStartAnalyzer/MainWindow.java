@@ -8,6 +8,7 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Vector;
 
@@ -33,7 +34,7 @@ public class MainWindow {
 	private JButton btnLoadRouteData;
 	JButton btnShowFileDialogButton = new JButton("Open File");
 	//private JDBCPointDao jdbcPointDao; 
-	static JTable pointTable;
+	static JTable pointTable = new JTable();
 	private JPanel btnPanel;
 	private JScrollPane scrollTable;
 	private JPanel tablePanel;
@@ -41,6 +42,7 @@ public class MainWindow {
 	private JSplitPane graphMapSplitPanel;
 	private JLabel statusLabel = new JLabel();
 	private JPanel graphPanel = new JPanel(new BorderLayout());
+	private JButton btnDeleteSelected;
 	private static MapPanel mapPanel = new MapPanel();
 	static String dbName = "VelocitekProAnalyzerDB.db";
 	
@@ -157,19 +159,18 @@ public class MainWindow {
 			}
 		});
 		
+		btnDeleteSelected = new JButton("Delete Selected");
+		btnPanel.add(btnDeleteSelected);
+		btnDeleteSelected.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				deleteFromDB();
+				loadDataFromDB();
+			}
+		});
+		
 		
 		btnPanel.add(btnShowFileDialogButton);
 	
-		pointTable = new JTable();		
-		pointTable.setEnabled(true);
-		pointTable.setModel(new DefaultTableModel(){
-			@Override
-			public boolean isCellEditable(int row, int column) {
-			       return false;
-			    }
-		});
-	
-		pointTable.setRowSelectionAllowed(true);
 		tableContainer = new JScrollPane(pointTable);
 		tableContainer.setPreferredSize(new Dimension(250,250));
 		
@@ -191,22 +192,35 @@ public class MainWindow {
 		loadDataFromDB();
 		
 	}
+	
+	private void testRemoving(){
+		pointTable = new JTable();
+		pointTable.removeAll();
+		pointTable.revalidate();
+		pointTable.repaint();
+		tableContainer = new JScrollPane(pointTable);
+		frame.getContentPane().add(tableContainer, BorderLayout.SOUTH);
+	}
+	
+	
 	private void loadDataFromDB(){
-		
 		mapPanel.map().removeAllMapPolygons();
 		mapPanel.map().removeAllMapMarkers();
 		mapPanel.map().removeAllMapRectangles();
 		JDBCPointDao jdbcPointDao = new JDBCPointDao();
 		jdbcPointDao.getConnection(dbName);
-		pointTable.setModel(buildTableModel(jdbcPointDao.select()));
+		jdbcPointDao.select();
+		pointTable.setModel(buildTableModel(JDBCPointDao.points));
+//		tableContainer.removeAll();
+	//	tableContainer.add(pointTable);
+	//	tableContainer.revalidate();
+		//pointTable.revalidate();
 		jdbcPointDao.closeConnection();
+		
 		//MapPolygon routePolygon = new MapPolygonImpl(JDBCPointDao.getMapPointsListCoords());
 		MapPolyline routePolyline = new MapPolyline(JDBCPointDao.mapPointsListCoords);
 		mapPanel.map().addMapPolygon(routePolyline);
 		mapPanel.revalidate();
-		mapPanel.map().setDisplayToFitMapMarkers();   
-		mapPanel.validate();
-		
 		CategoryDataset dataset = jdbcPointDao.dataSet;
 	    JFreeChart chart = createChart(dataset);
 	    ChartPanel chartPanel = new ChartPanel(chart);
@@ -218,8 +232,24 @@ public class MainWindow {
 	    graphPanel.add(chartPanel, BorderLayout.CENTER);
 	    graphPanel.revalidate();
 	    graphMapSplitPanel.revalidate();
+	   // frame.revalidate();
 	   
 }
+	
+	private void deleteFromDB(){
+		JDBCPointDao jdbcPointDao = new JDBCPointDao();
+		jdbcPointDao.getConnection(dbName);
+		for (int selectedRowID : pointTable.getSelectedRows()) {
+			int id =  (int) pointTable.getModel().getValueAt(selectedRowID, 0);
+			jdbcPointDao.delete(id);
+		}
+		try {
+			jdbcPointDao.connection.commit();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		jdbcPointDao.closeConnection();
+	}
 	private void showFileChooser(){
    
 	   final JFileChooser  fileDialog = new JFileChooser();

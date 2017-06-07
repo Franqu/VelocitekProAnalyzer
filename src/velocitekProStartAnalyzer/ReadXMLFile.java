@@ -17,7 +17,7 @@ import org.w3c.dom.NodeList;
 		  JDBCPointDao jdbcPointDao = new JDBCPointDao();
 		  PointDto pointDto = new PointDto();
 		  jdbcPointDao.getConnection(MainWindow.dbName);
-			jdbcPointDao.delete();
+			jdbcPointDao.deleteVacuum();
 	    try {
 	    	
 	    	

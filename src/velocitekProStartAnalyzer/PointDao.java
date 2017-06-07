@@ -8,5 +8,6 @@ public interface PointDao {
  /*   public void insert(PointDao person);*/
     public List<PointDto> select();
     public void insert(PointDto pointDto);
-    public void delete();
+    public void deleteVacuum();
+    public void delete(int id);
 }

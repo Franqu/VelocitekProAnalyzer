@@ -64,8 +64,9 @@ public class JDBCPointDao implements PointDao {
   
 	@Override
     public List<PointDto> select() {
-		    	
-        
+		points.clear();
+		dataSet.clear();
+		mapPointsListCoords.clear();
          try {
                 Statement statement = connection.createStatement();
                 ResultSet resultSet = statement.executeQuery("SELECT * FROM point_data;");
@@ -139,7 +140,7 @@ public class JDBCPointDao implements PointDao {
    }
 	
 	@Override
-	public void delete() {
+	public void deleteVacuum() {
 		 try {
 		 Statement statement = connection.createStatement();
 		 statement.executeUpdate("DELETE FROM point_data;");
@@ -148,4 +149,20 @@ public class JDBCPointDao implements PointDao {
              e.printStackTrace();
 		 }
 	}
+	
+	public void delete(int id){
+		try{
+			connection.setAutoCommit(false);
+			Statement statement = connection.createStatement();
+			 statement.executeUpdate("DELETE FROM point_data WHERE idpoint_data = " + id + ";");
+			 statement.close();
+		}
+		catch(SQLException e)
+		{
+			e.printStackTrace();
+		}
+
+	}
+
+
 }

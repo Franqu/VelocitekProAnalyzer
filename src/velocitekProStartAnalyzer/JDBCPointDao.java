@@ -150,7 +150,7 @@ public class JDBCPointDao implements PointDao {
 		 }
 	}
 	
-	public void delete(int id){
+	public void deleteSelected(int id){
 		try{
 			connection.setAutoCommit(false);
 			Statement statement = connection.createStatement();

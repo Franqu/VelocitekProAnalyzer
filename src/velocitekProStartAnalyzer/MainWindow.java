@@ -3,12 +3,9 @@ package velocitekProStartAnalyzer;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Vector;
 
@@ -20,7 +17,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
-import javax.swing.JViewport;
 import javax.swing.table.DefaultTableModel;
 
 import org.jfree.chart.ChartFactory;
@@ -163,12 +159,11 @@ public class MainWindow {
 		btnPanel.add(btnDeleteSelected);
 		btnDeleteSelected.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				deleteFromDB();
+				deleteSelected();
 				loadDataFromDB();
 			}
 		});
-		
-		
+						
 		btnPanel.add(btnShowFileDialogButton);
 	
 		tableContainer = new JScrollPane(pointTable);
@@ -193,15 +188,6 @@ public class MainWindow {
 		
 	}
 	
-	private void testRemoving(){
-		pointTable = new JTable();
-		pointTable.removeAll();
-		pointTable.revalidate();
-		pointTable.repaint();
-		tableContainer = new JScrollPane(pointTable);
-		frame.getContentPane().add(tableContainer, BorderLayout.SOUTH);
-	}
-	
 	
 	private void loadDataFromDB(){
 		mapPanel.map().removeAllMapPolygons();
@@ -211,13 +197,8 @@ public class MainWindow {
 		jdbcPointDao.getConnection(dbName);
 		jdbcPointDao.select();
 		pointTable.setModel(buildTableModel(JDBCPointDao.points));
-//		tableContainer.removeAll();
-	//	tableContainer.add(pointTable);
-	//	tableContainer.revalidate();
-		//pointTable.revalidate();
 		jdbcPointDao.closeConnection();
 		
-		//MapPolygon routePolygon = new MapPolygonImpl(JDBCPointDao.getMapPointsListCoords());
 		MapPolyline routePolyline = new MapPolyline(JDBCPointDao.mapPointsListCoords);
 		mapPanel.map().addMapPolygon(routePolyline);
 		mapPanel.revalidate();
@@ -232,16 +213,15 @@ public class MainWindow {
 	    graphPanel.add(chartPanel, BorderLayout.CENTER);
 	    graphPanel.revalidate();
 	    graphMapSplitPanel.revalidate();
-	   // frame.revalidate();
-	   
+
 }
 	
-	private void deleteFromDB(){
+	private void deleteSelected(){
 		JDBCPointDao jdbcPointDao = new JDBCPointDao();
 		jdbcPointDao.getConnection(dbName);
 		for (int selectedRowID : pointTable.getSelectedRows()) {
 			int id =  (int) pointTable.getModel().getValueAt(selectedRowID, 0);
-			jdbcPointDao.delete(id);
+			jdbcPointDao.deleteSelected(id);
 		}
 		try {
 			jdbcPointDao.connection.commit();
@@ -250,6 +230,8 @@ public class MainWindow {
 		}
 		jdbcPointDao.closeConnection();
 	}
+	
+	
 	private void showFileChooser(){
    
 	   final JFileChooser  fileDialog = new JFileChooser();

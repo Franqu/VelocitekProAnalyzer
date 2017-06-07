@@ -9,5 +9,5 @@ public interface PointDao {
     public List<PointDto> select();
     public void insert(PointDto pointDto);
     public void deleteVacuum();
-    public void delete(int id);
+    public void deleteSelected(int id);
 }

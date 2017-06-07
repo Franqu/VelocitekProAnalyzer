@@ -39,6 +39,7 @@ public class MainWindow {
 	private JLabel statusLabel = new JLabel();
 	private JPanel graphPanel = new JPanel(new BorderLayout());
 	private JButton btnDeleteSelected;
+	private JButton btnSetStartTime;
 	private static MapPanel mapPanel = new MapPanel();
 	static String dbName = "VelocitekProAnalyzerDB.db";
 	
@@ -163,6 +164,15 @@ public class MainWindow {
 				loadDataFromDB();
 			}
 		});
+		
+		btnSetStartTime = new JButton("Set Start Time");
+		btnPanel.add(btnSetStartTime);
+		btnSetStartTime.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				setStartTime("14:00");
+				loadDataFromDB();
+			}
+		});
 						
 		btnPanel.add(btnShowFileDialogButton);
 	
@@ -230,6 +240,26 @@ public class MainWindow {
 		}
 		jdbcPointDao.closeConnection();
 	}
+	
+	private void setStartTime(String startTime){
+		JDBCPointDao jdbcPointDao = new JDBCPointDao();
+		jdbcPointDao.getConnection(dbName);
+		for (PointDto pointDto : JDBCPointDao.points) {
+			String time = pointDto.getPointDate();
+			time = time.substring(11,time.length()-3);
+			jdbcPointDao.deleteSelected(pointDto.getPointID());	
+			if(time.equals(startTime)){
+				break;
+			}
+		}
+		try {
+			jdbcPointDao.connection.commit();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		jdbcPointDao.closeConnection();
+	}
+	
 	
 	
 	private void showFileChooser(){

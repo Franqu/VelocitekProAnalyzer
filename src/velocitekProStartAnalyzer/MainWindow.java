@@ -245,7 +245,7 @@ public class MainWindow {
 			}
 		});
 		
-		btnSetStartTime = new JMenuItem("Set Start Time");
+		btnSetStartTime = new JMenuItem("Set Race Time");
 		popup.add(btnSetStartTime);
 		btnSetStartTime.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.SQLException;
@@ -18,11 +19,15 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 import org.jfree.chart.ChartFactory;
@@ -30,6 +35,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.CategoryDataset;
+import org.openstreetmap.gui.jmapviewer.MapMarkerDot;
 
 import com.sun.org.apache.xpath.internal.operations.Bool;
 public class MainWindow {
@@ -46,10 +52,13 @@ public class MainWindow {
 	private JSplitPane graphMapSplitPanel;
 	private JLabel statusLabel = new JLabel();
 	private JPanel graphPanel = new JPanel(new BorderLayout());
-	private JButton btnDeleteSelected;
-	private JButton btnSetStartTime;
+	private JMenuItem btnDeleteSelected;
+	private JMenuItem btnSetStartTime;
+	private String filePath;
+	private JMenuItem btnDeleteAllButNotSelected;
 	private static MapPanel mapPanel = new MapPanel();
 	static String dbName = "VelocitekProAnalyzerDB.db";
+	static JPopupMenu popup;
 	public static MapPanel getMapPanel() {
 		return mapPanel;
 	}
@@ -75,7 +84,7 @@ public class MainWindow {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				mapPanel.map().setDisplayToFitMapMarkers();
-				System.out.println(pointTable.isCellEditable(3, 3)); 
+				getMapPanel().map().removeAllMapMarkers();
 				}
 		});
 		
@@ -101,11 +110,11 @@ public class MainWindow {
 		    // names of columns
 		    Vector<String> columnNames = new Vector<>();
 		    columnNames.add("ID");//TODO:delete at release
-		    columnNames.add("Date");
+		    columnNames.add("Time");
 		    columnNames.add("Heading");
 		    columnNames.add("Speed");
-		    columnNames.add("Longtitude");
 		    columnNames.add("Latitude");
+		    columnNames.add("Longtitude");
 
 		    // data of the table
 		    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
@@ -122,7 +131,15 @@ public class MainWindow {
 		        }
 		        data.add(vector);
 		    }
-		    return new DefaultTableModel(data, columnNames);
+		    return new DefaultTableModel(data, columnNames){
+		    	
+				private static final long serialVersionUID = -6622905133391297170L;
+
+				@Override
+		    	    public boolean isCellEditable(int row, int column) {
+		    	        return false;
+		    	    }
+		    };
 		}
 	      
 	private JFreeChart createChart(final CategoryDataset dataset) {
@@ -155,35 +172,20 @@ public class MainWindow {
 		btnPanel = new JPanel();
 		frame.getContentPane().add(btnPanel, BorderLayout.NORTH);
 		
-		btnLoadRouteData = new JButton("Refresh");
+		
+		ReadXMLFile readXmlFile = new ReadXMLFile();
+		
+		btnLoadRouteData = new JButton("Reload");
 		btnPanel.add(btnLoadRouteData);
+		if(getFilePath() == null){btnLoadRouteData.setEnabled(false);}
 		btnLoadRouteData.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				readXmlFile.ReadXmlFile(getFilePath());
 				loadDataFromDB();
 			}
 		});
 		
-		btnDeleteSelected = new JButton("Delete Selected");
-		btnPanel.add(btnDeleteSelected);
-		btnDeleteSelected.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				deleteSelected();
-				loadDataFromDB();
-			}
-		});
 		
-		btnSetStartTime = new JButton("Set Start Time");
-		btnPanel.add(btnSetStartTime);
-		btnSetStartTime.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					setStartTime(showSetTimerDialog());
-				} catch (NullPointerException exception) {
-					return;
-				}
-				loadDataFromDB();
-			}
-		});
 						
 		btnPanel.add(btnShowFileDialogButton);
 	
@@ -206,6 +208,68 @@ public class MainWindow {
 		//frame.add(statusLabel);
 		showFileChooser();
 		loadDataFromDB();
+		
+		pointTable.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
+	        public void valueChanged(ListSelectionEvent event) {
+	        	getMapPanel().map().removeAllMapMarkers();
+	        	for (int pointTableID : pointTable.getSelectedRows()) {
+	        		MapMarkerDot mapPoint = new MapMarkerDot(null,  (String) pointTable.getValueAt(pointTableID,1), (double) pointTable.getValueAt(pointTableID,4),(double) pointTable.getValueAt(pointTableID,5));                     
+	                if(!getMapPanel().map().getMapMarkerList().contains(mapPoint)){
+	             	   getMapPanel().map().addMapMarker(mapPoint);
+	                }
+	                mapPanel.map().setDisplayToFitMapMarkers();
+				}
+	        	
+	           
+	        }
+	    });
+		
+		popup = new JPopupMenu();
+		
+	      
+	    btnDeleteSelected = new JMenuItem("Delete Selected");
+		popup.add(btnDeleteSelected);
+		btnDeleteSelected.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				deleteSelected();
+				loadDataFromDB();
+			}
+		});
+		
+		btnDeleteAllButNotSelected = new JMenuItem("Delete Not Selected");
+		popup.add(btnDeleteAllButNotSelected);
+		btnDeleteAllButNotSelected.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				deleteAllButNotSelected();
+				loadDataFromDB();
+			}
+		});
+		
+		btnSetStartTime = new JMenuItem("Set Start Time");
+		popup.add(btnSetStartTime);
+		btnSetStartTime.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					setStartTime(showSetStartTimeDialog());
+					loadDataFromDB();
+					setEndTime(showSetEndTimeDialog());
+				} catch (NullPointerException exception) {
+					return;
+				}
+				loadDataFromDB();
+			}
+		});
+		
+		    
+	    //Add listener to components that can bring up popup menus.
+	    MouseListener popupListener = new PopupListener();
+	    frame.addMouseListener(popupListener);
+	    graphMapSplitPanel.addMouseListener(popupListener);
+	    tableContainer.addMouseListener(popupListener);
+	    pointTable.addMouseListener(popupListener);
+		    
+	
+		
 		
 	}
 	
@@ -234,12 +298,20 @@ public class MainWindow {
 	    graphPanel.add(chartPanel, BorderLayout.CENTER);
 	    graphPanel.revalidate();
 	    graphMapSplitPanel.revalidate();
+	    mapPanel.map().setDisplayToFitMapMarkers();
+	    if(getFilePath() != null){btnLoadRouteData.setEnabled(true);}
+	    
 
 }
 	
 	private void deleteSelected(){
 		JDBCPointDao jdbcPointDao = new JDBCPointDao();
 		jdbcPointDao.getConnection(dbName);
+		try {
+			jdbcPointDao.connection.setAutoCommit(false);
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		for (int selectedRowID : pointTable.getSelectedRows()) {
 			int id =  (int) pointTable.getModel().getValueAt(selectedRowID, 0);
 			jdbcPointDao.deleteSelected(id);
@@ -250,6 +322,38 @@ public class MainWindow {
 			e.printStackTrace();
 		}
 		jdbcPointDao.closeConnection();
+	}
+	
+	private void deleteAllButNotSelected(){
+		if(pointTable.getSelectedRowCount() != 0){
+			
+			JDBCPointDao jdbcPointDao = new JDBCPointDao();
+			jdbcPointDao.getConnection(dbName);
+			try {
+				jdbcPointDao.connection.setAutoCommit(false);
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			List<Integer> selectedIdList = new ArrayList<Integer>();
+			for (int selectedRowID : pointTable.getSelectedRows()) {
+				int id =  (int) pointTable.getModel().getValueAt(selectedRowID, 0);
+				selectedIdList.add(id);
+			}
+			
+			for (PointDto pointDto : JDBCPointDao.points) {
+				if(!selectedIdList.contains(pointDto.getPointID())){
+					jdbcPointDao.deleteSelected(pointDto.getPointID());
+				}
+			}
+			try {
+				
+				jdbcPointDao.connection.commit();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			jdbcPointDao.closeConnection();
+		}
+		
 	}
 	
 	private void setStartTime(String startTime){
@@ -269,7 +373,7 @@ public class MainWindow {
 		
 		for (PointDto pointDto : JDBCPointDao.points) {
 			String time = pointDto.getPointDate();
-			time = time.substring(11,time.length()-3);
+			time = time.substring(0,time.length()-3);
 			if(time.equals(startTime)){
 				flagTimeIsInPoints = true;
 				break;
@@ -279,11 +383,55 @@ public class MainWindow {
 		{
 			for (PointDto pointDto : JDBCPointDao.points) {
 				String time = pointDto.getPointDate();
-				time = time.substring(11,time.length()-3);
+				time = time.substring(0,time.length()-3);
 				jdbcPointDao.deleteSelected(pointDto.getPointID());	
 				if(time.equals(startTime)){
 					break;
 				}
+			}
+			try {
+				jdbcPointDao.connection.commit();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		jdbcPointDao.closeConnection();
+	}
+	
+	private void setEndTime(String endTime){
+		Boolean flagTimeIsInPoints = false;
+		Boolean startDeleting = false;
+		if(endTime.equals(null))
+		{
+			return;
+		}
+		
+		JDBCPointDao jdbcPointDao = new JDBCPointDao();
+		jdbcPointDao.getConnection(dbName);
+		try {
+			jdbcPointDao.connection.setAutoCommit(false);
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		
+		for (PointDto pointDto : JDBCPointDao.points) {
+			String time = pointDto.getPointDate();
+			time = time.substring(0,time.length()-3);
+			if(time.equals(endTime)){
+				flagTimeIsInPoints = true;
+				break;
+			}
+		}
+		if(flagTimeIsInPoints.equals(true))
+		{
+			for (PointDto pointDto : JDBCPointDao.points) {
+				String time = pointDto.getPointDate();
+				time = time.substring(0,time.length()-3);
+				if(time.equals(endTime)){
+					startDeleting = true;
+				}
+				if(startDeleting){jdbcPointDao.deleteSelected(pointDto.getPointID());}	
+				
 			}
 			try {
 				jdbcPointDao.connection.commit();
@@ -311,7 +459,8 @@ public class MainWindow {
 	            java.io.File file = fileDialog.getSelectedFile();
 	            if(file.getPath().substring(file.getPath().length() - 4).equals(".vcc"))
 	            {
-	            readXmlFile.ReadXmlFile(file.getPath());
+	            	setFilePath(file.getPath());
+	            readXmlFile.ReadXmlFile(getFilePath());
 	            loadDataFromDB();
 	            statusLabel.setText("File Loaded :" + file.getName());
 	            }
@@ -327,15 +476,15 @@ public class MainWindow {
   // btnPanel.add(showFileDialogButton);
      
 }
-	private String showSetTimerDialog(){
+	private String showSetStartTimeDialog(){
 				Object[] hoursInPoints = {};
 
 				String time = "Checking";
 				for (PointDto pointDto : JDBCPointDao.points) {
-					if(!time.equals(pointDto.getPointDate().substring(11,pointDto.getPointDate().length()-3)))
+					if(!time.equals(pointDto.getPointDate().substring(0,pointDto.getPointDate().length()-3)))
 					{
 						time = pointDto.getPointDate();
-						time = time.substring(11,time.length()-3);
+						time = time.substring(0,time.length()-3);
 						hoursInPoints = appendValue(hoursInPoints, time);
 					}
 					
@@ -345,7 +494,7 @@ public class MainWindow {
             frame,
             "Choose start time:\n"
             + "hh:mm",
-            "Set start time",
+            "Time Chooser",
             JOptionPane.PLAIN_MESSAGE,
             null,
             hoursInPoints,
@@ -354,6 +503,33 @@ public class MainWindow {
 
 		}
 	
+	private String showSetEndTimeDialog(){
+		Object[] hoursInPoints = {};
+
+		String time = "Checking";
+		for (PointDto pointDto : JDBCPointDao.points) {
+			if(!time.equals(pointDto.getPointDate().substring(0,pointDto.getPointDate().length()-3)))
+			{
+				time = pointDto.getPointDate();
+				time = time.substring(0,time.length()-3);
+				hoursInPoints = appendValue(hoursInPoints, time);
+			}
+			
+		}
+
+		String s = (String)JOptionPane.showInputDialog(
+		    frame,
+		    "Choose end time:\n"
+		    + "hh:mm",
+		    "Set end time",
+		    JOptionPane.PLAIN_MESSAGE,
+		    null,
+		    hoursInPoints,
+		    null);
+		return s;
+
+}
+	
 	 private Object[] appendValue(Object[] obj, Object newObj) {
 
 			ArrayList<Object> temp = new ArrayList<Object>(Arrays.asList(obj));
@@ -361,6 +537,7 @@ public class MainWindow {
 			return temp.toArray();
 
 		  }
+	 
 	
 	/*private void showSetTimerTEST(){
 		final JOptionPane optionPane = new JOptionPane(
@@ -423,6 +600,14 @@ public JPanel getTablePanel() {
 
 public void setTablePanel(JPanel tablePanel) {
 	this.tablePanel = tablePanel;
+}
+
+public String getFilePath() {
+	return filePath;
+}
+
+public void setFilePath(String filePath) {
+	this.filePath = filePath;
 }
 	
 }

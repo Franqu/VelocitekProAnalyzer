@@ -72,7 +72,7 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
      // Listen to the map viewer for user operations so components will
      // receive events and update
      map().addJMVListener(this);
-     map().setMapMarkerVisible(false);
+     map().setMapMarkerVisible(true);
      setLayout(new BorderLayout());
     
      JPanel panel = new JPanel(new BorderLayout());
@@ -122,7 +122,7 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
      map().setTileLoader((TileLoader) tileLoaderSelector.getSelectedItem());
      panelTop.add(tileSourceSelector);
      panelTop.add(tileLoaderSelector);
-     final JCheckBox showMapMarker = new JCheckBox("Map markers visible");
+     final JCheckBox showMapMarker = new JCheckBox("Points visible");
      showMapMarker.setSelected(map().getMapMarkersVisible());
      showMapMarker.addActionListener(new ActionListener() {
          @Override
@@ -159,6 +159,7 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
          }
      });
      panelBottom.add(showTileGrid);
+     showToolTip.setSelected(true);
      final JCheckBox showZoomControls = new JCheckBox("Show zoom controls");
      showZoomControls.setSelected(map().getZoomControlsVisible());
      showZoomControls.addActionListener(new ActionListener() {
@@ -214,15 +215,15 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
             	 for (PointDto cord : JDBCPointDao.points) {
 /*            		 String TEST = new DecimalFormat("#.####",otherSymbols).format(cord.getPointLatidude());
             		 System.out.println(TEST);*/
-					if(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(c.getLat())))   
-							&& Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(c.getLon()))) )
+					if(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(c.getLat())))   
+							&& Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(c.getLon()))) )
 						map().setToolTipText(
 						"ID: "+Integer.toString(cord.getPointID())
 						+" Lat: " + cord.getPointLatidude()
 						+" Lon: " + cord.getPointLongtidude()
 						+" Speed: "+ cord.getPointSpeed()
 						+" Heading: " + cord.getPointHeading()
-						+ " Hour: " + cord.getPointDate().substring(11)
+						+ " Hour: " + cord.getPointDate()
 						);
             	 }
              }
@@ -253,44 +254,65 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
              
              if(SwingUtilities.isLeftMouseButton(e) && e.isShiftDown()){                   
             	 for (PointDto cord : JDBCPointDao.points) {
-					if(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(c.getLat())))   
-							&& Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(c.getLon()))))
+					if(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(c.getLat())))   
+							&& Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(c.getLon()))))
 					{
 						if(MainWindow.pointTable.getSelectionModel() == null){
-							MainWindow.pointTable.setRowSelectionInterval(cord.getPointID()-1,cord.getPointID()-1);	
+							for (int i=0; i < MainWindow.pointTable.getModel().getRowCount(); i++) {
+    							if(MainWindow.pointTable.getModel().getValueAt(i, 0).equals(cord.getPointID()))
+    							{
+    								MainWindow.pointTable.setRowSelectionInterval(i,i);
+    							}
+							}    			
 						}
 						else{
-							MainWindow.pointTable.addRowSelectionInterval(MainWindow.pointTable.getSelectedRow(),cord.getPointID()-1);
+							for (int i=0; i < MainWindow.pointTable.getModel().getRowCount(); i++) {
+								if(MainWindow.pointTable.getModel().getValueAt(i, 0).equals(cord.getPointID()))
+								{
+									MainWindow.pointTable.setRowSelectionInterval(MainWindow.pointTable.getSelectedRow(),i);
+								}
 							
 						}
 						
+						
 						MainWindow.pointTable.scrollRectToVisible(MainWindow.pointTable.getCellRect(cord.getPointID()-1, 0, true));
 					}   						
-            	 }      
+            	 }
+            	 }
              }
              else if(SwingUtilities.isLeftMouseButton(e) && e.isControlDown()){                   
             	 for (PointDto cord : JDBCPointDao.points) {
-					if(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(c.getLat())))   
-							&& Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(c.getLon()))))
+					if(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(c.getLat())))   
+							&& Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(c.getLon()))))
 					{
 						if(MainWindow.pointTable.getSelectionModel() == null){
 							continue;
-						}    						
-						MainWindow.pointTable.removeRowSelectionInterval(cord.getPointID()-1,cord.getPointID()-1);
+						}
+						for (int i=0; i < MainWindow.pointTable.getModel().getRowCount(); i++) {
+							if(MainWindow.pointTable.getModel().getValueAt(i, 0).equals(cord.getPointID()))
+							{
+								MainWindow.pointTable.removeRowSelectionInterval(i,i);
+							}
 						MainWindow.pointTable.scrollRectToVisible(MainWindow.pointTable.getCellRect(cord.getPointID()-1, 0, true));
 						//MainWindow.pointTable.revalidate();    						
 					}   						
-            	 }                    			 
+            	 }   
+        	 }
 		 }
              else if(SwingUtilities.isLeftMouseButton(e)){                   
                 	 for (PointDto cord : JDBCPointDao.points) {
-    					if(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(c.getLat())))   
-    							&& Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(c.getLon()))))
+    					if(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(c.getLat())))   
+    							&& Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(c.getLon()))))
     					{
     						if(MainWindow.pointTable.getSelectionModel() != null){
     							MainWindow.pointTable.getSelectionModel().clearSelection();
-    						}    						
-    						MainWindow.pointTable.setRowSelectionInterval(cord.getPointID()-1,cord.getPointID()-1);
+    						}
+    						for (int i=0; i < MainWindow.pointTable.getModel().getRowCount(); i++) {
+    							if(MainWindow.pointTable.getModel().getValueAt(i, 0).equals(cord.getPointID()))
+    							{
+    								MainWindow.pointTable.setRowSelectionInterval(i,i);
+    							}
+							}    						
     						MainWindow.pointTable.scrollRectToVisible(MainWindow.pointTable.getCellRect(cord.getPointID()-1, 0, true));
     						//MainWindow.pointTable.revalidate();    						
     					}   						

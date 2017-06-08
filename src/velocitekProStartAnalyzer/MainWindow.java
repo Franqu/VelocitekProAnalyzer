@@ -8,6 +8,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
@@ -28,6 +30,8 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.CategoryDataset;
+
+import com.sun.org.apache.xpath.internal.operations.Bool;
 public class MainWindow {
 	
 	private JFrame frame;
@@ -46,7 +50,6 @@ public class MainWindow {
 	private JButton btnSetStartTime;
 	private static MapPanel mapPanel = new MapPanel();
 	static String dbName = "VelocitekProAnalyzerDB.db";
-	
 	public static MapPanel getMapPanel() {
 		return mapPanel;
 	}
@@ -173,7 +176,11 @@ public class MainWindow {
 		btnPanel.add(btnSetStartTime);
 		btnSetStartTime.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				setStartTime(showSetTimerDialog());
+				try {
+					setStartTime(showSetTimerDialog());
+				} catch (NullPointerException exception) {
+					return;
+				}
 				loadDataFromDB();
 			}
 		});
@@ -246,20 +253,43 @@ public class MainWindow {
 	}
 	
 	private void setStartTime(String startTime){
+		Boolean flagTimeIsInPoints = false;
+		if(startTime.equals(null))
+		{
+			return;
+		}
+		
 		JDBCPointDao jdbcPointDao = new JDBCPointDao();
 		jdbcPointDao.getConnection(dbName);
+		try {
+			jdbcPointDao.connection.setAutoCommit(false);
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		
 		for (PointDto pointDto : JDBCPointDao.points) {
 			String time = pointDto.getPointDate();
 			time = time.substring(11,time.length()-3);
-			jdbcPointDao.deleteSelected(pointDto.getPointID());	
 			if(time.equals(startTime)){
+				flagTimeIsInPoints = true;
 				break;
 			}
 		}
-		try {
-			jdbcPointDao.connection.commit();
-		} catch (SQLException e) {
-			e.printStackTrace();
+		if(flagTimeIsInPoints.equals(true))
+		{
+			for (PointDto pointDto : JDBCPointDao.points) {
+				String time = pointDto.getPointDate();
+				time = time.substring(11,time.length()-3);
+				jdbcPointDao.deleteSelected(pointDto.getPointID());	
+				if(time.equals(startTime)){
+					break;
+				}
+			}
+			try {
+				jdbcPointDao.connection.commit();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
 		jdbcPointDao.closeConnection();
 	}
@@ -298,19 +328,40 @@ public class MainWindow {
      
 }
 	private String showSetTimerDialog(){
-		//Object[] possibilities = {"ham", "spam", "yam"};
+				Object[] hoursInPoints = {};
+
+				String time = "Checking";
+				for (PointDto pointDto : JDBCPointDao.points) {
+					if(!time.equals(pointDto.getPointDate().substring(11,pointDto.getPointDate().length()-3)))
+					{
+						time = pointDto.getPointDate();
+						time = time.substring(11,time.length()-3);
+						hoursInPoints = appendValue(hoursInPoints, time);
+					}
+					
+				}
+		
 		String s = (String)JOptionPane.showInputDialog(
             frame,
             "Choose start time:\n"
-            + "\"Green eggs and...\"",
-            "Customized Dialog",
+            + "hh:mm",
+            "Set start time",
             JOptionPane.PLAIN_MESSAGE,
             null,
-            null,
-            "00:00");
+            hoursInPoints,
+            null);
 		return s;
 
 		}
+	
+	 private Object[] appendValue(Object[] obj, Object newObj) {
+
+			ArrayList<Object> temp = new ArrayList<Object>(Arrays.asList(obj));
+			temp.add(newObj);
+			return temp.toArray();
+
+		  }
+	
 	/*private void showSetTimerTEST(){
 		final JOptionPane optionPane = new JOptionPane(
                 "The only way to close this dialog is by\n"

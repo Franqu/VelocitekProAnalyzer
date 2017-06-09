@@ -242,28 +242,31 @@ public class MainWindow {
 		
 		pointTable.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
 	        public void valueChanged(ListSelectionEvent event) {
-	        	getMapPanel().map().removeAllMapMarkers();
-	        	for (int pointTableID : pointTable.getSelectedRows()) {
-	        		MapMarkerDot mapPoint = new MapMarkerDot(null,  (String) pointTable.getValueAt(pointTableID,1), (double) pointTable.getValueAt(pointTableID,4),(double) pointTable.getValueAt(pointTableID,5));                     
-	                if(!getMapPanel().map().getMapMarkerList().contains(mapPoint)){
-	             	   getMapPanel().map().addMapMarker(mapPoint);
-	                }
-	                mapPanel.map().setDisplayToFitMapMarkers();
-				}
-	        	int index = 0;
-	        	for(int pointTableID: pointTable.getSelectedRows()){
-	        		index = pointTableID;
+	        	if(!JDBCPointDao.points.isEmpty()){
+	        		getMapPanel().map().removeAllMapMarkers();
+		        	for (int pointTableID : pointTable.getSelectedRows()) {
+		        		MapMarkerDot mapPoint = new MapMarkerDot(null,  (String) pointTable.getValueAt(pointTableID,1), (double) pointTable.getValueAt(pointTableID,4),(double) pointTable.getValueAt(pointTableID,5));                     
+		                if(!getMapPanel().map().getMapMarkerList().contains(mapPoint)){
+		             	   getMapPanel().map().addMapMarker(mapPoint);
+		                }
+		                mapPanel.map().setDisplayToFitMapMarkers();
+					}
+		        	int index = 0;
+		        	for(int pointTableID: pointTable.getSelectedRows()){
+		        		index = pointTableID;
+		        	}
+		        	Double x = Double.valueOf(pointTable.getValueAt(index, 0).toString());
+		        	Double y = Double.valueOf(pointTable.getValueAt(index, 3).toString());
+		        	
+		        	//int test2 = (int) pointTable.getValueAt(pointTable.getSelectedRow(), 3);
+		        	
+		        	xCrosshair.setValue(x);
+		            yCrosshair.setValue(y);	 
+		        	
+		           
+		        }
 	        	}
-	        	Double x = Double.valueOf(pointTable.getValueAt(index, 0).toString());
-	        	Double y = Double.valueOf(pointTable.getValueAt(index, 3).toString());
 	        	
-	        	//int test2 = (int) pointTable.getValueAt(pointTable.getSelectedRow(), 3);
-	        	
-	        	xCrosshair.setValue(x);
-	            yCrosshair.setValue(y);	 
-	        	
-	           
-	        }
 	    });
 		
 		popup = new JPopupMenu();
@@ -327,20 +330,23 @@ public class MainWindow {
 	}
 	
 	private static void setStartFinishMapMarkers(){
-		mapPanel.map().removeAllMapMarkers();
-		MapMarkerDot mapPointStart = new MapMarkerDot(null,  "START", (double) pointTable.getValueAt(0,4),(double) pointTable.getValueAt(0,5));  
-		MapMarkerDot mapPointFinish = new MapMarkerDot(null,  "FINISH", (double) pointTable.getValueAt(pointTable.getModel().getRowCount()-1,4),(double) pointTable.getValueAt(pointTable.getModel().getRowCount()-1,5));
-		if(mapPointStart.getCoordinate().equals(mapPointFinish.getCoordinate()))
-		{
-			MapMarkerDot mapPointOnlyOne = new MapMarkerDot(null,  (String) pointTable.getValueAt(0, 1), (double) pointTable.getValueAt(0,4),(double) pointTable.getValueAt(0,5));
-			getMapPanel().map().addMapMarker(mapPointOnlyOne);
+		if(!JDBCPointDao.points.isEmpty()){
+			mapPanel.map().removeAllMapMarkers();
+			MapMarkerDot mapPointStart = new MapMarkerDot(null,  "START", (double) pointTable.getValueAt(0,4),(double) pointTable.getValueAt(0,5));  
+			MapMarkerDot mapPointFinish = new MapMarkerDot(null,  "FINISH", (double) pointTable.getValueAt(pointTable.getModel().getRowCount()-1,4),(double) pointTable.getValueAt(pointTable.getModel().getRowCount()-1,5));
+			if(mapPointStart.getCoordinate().equals(mapPointFinish.getCoordinate()))
+			{
+				MapMarkerDot mapPointOnlyOne = new MapMarkerDot(null,  (String) pointTable.getValueAt(0, 1), (double) pointTable.getValueAt(0,4),(double) pointTable.getValueAt(0,5));
+				getMapPanel().map().addMapMarker(mapPointOnlyOne);
+			}
+			else{
+				getMapPanel().map().addMapMarker(mapPointStart);
+				getMapPanel().map().addMapMarker(mapPointFinish);
+			}
+			mapPanel.map().setDisplayToFitMapPolygons();
+	       
 		}
-		else{
-			getMapPanel().map().addMapMarker(mapPointStart);
-			getMapPanel().map().addMapMarker(mapPointFinish);
-		}
-		mapPanel.map().setDisplayToFitMapPolygons();
-       
+	
 	}
 	
 	
@@ -432,10 +438,15 @@ public class MainWindow {
 	    ValueAxis domainAxis = xyPlot.getDomainAxis();
 	    ValueAxis rangeAxis = xyPlot.getRangeAxis();
 	    NavigableMap<Double,PointDto> pointDtoSortedSpeedMap = new TreeMap<Double,PointDto>();
-	    for (PointDto pointDto : JDBCPointDao.points) {
-	    				pointDtoSortedSpeedMap.put(pointDto.getPointSpeed(),pointDto);
-		}
-	    rangeAxis.setRange(pointDtoSortedSpeedMap.firstEntry().getKey()-0.1,pointDtoSortedSpeedMap.lastEntry().getKey()+0.1);
+	    
+	    if(!JDBCPointDao.points.isEmpty()){
+    		for (PointDto pointDto : JDBCPointDao.points) {
+    			pointDtoSortedSpeedMap.put(pointDto.getPointSpeed(),pointDto);
+	    	}
+	    	rangeAxis.setRange(pointDtoSortedSpeedMap.firstEntry().getKey()-0.1,pointDtoSortedSpeedMap.lastEntry().getKey()+0.1);
+	    }
+	    
+	    
 	    
 	    CrosshairOverlay crosshairOverlay = new CrosshairOverlay();
         xCrosshair = new Crosshair(Double.NaN, Color.GRAY, 

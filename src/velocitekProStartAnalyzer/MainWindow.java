@@ -1,6 +1,8 @@
 package velocitekProStartAnalyzer;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -8,10 +10,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.Rectangle2D;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -31,10 +39,28 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartMouseEvent;
+import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.NumberTickUnit;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.entity.ChartEntity;
+import org.jfree.chart.entity.XYItemEntity;
+import org.jfree.chart.panel.CrosshairOverlay;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.Crosshair;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.general.DatasetUtilities;
+import org.jfree.data.xy.XYDataItem;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.ui.RectangleEdge;
 import org.openstreetmap.gui.jmapviewer.MapMarkerDot;
 
 import com.sun.org.apache.xpath.internal.operations.Bool;
@@ -56,7 +82,10 @@ public class MainWindow {
 	private JMenuItem btnSetStartTime;
 	private String filePath;
 	private JMenuItem btnDeleteAllButNotSelected;
+	private JMenuItem btnSetStartFinishMapMarkers;
 	private static MapPanel mapPanel = new MapPanel();
+	private Crosshair xCrosshair;
+    private Crosshair yCrosshair;
 	static String dbName = "VelocitekProAnalyzerDB.db";
 	static JPopupMenu popup;
 	public static MapPanel getMapPanel() {
@@ -83,8 +112,7 @@ public class MainWindow {
 		});
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
-				mapPanel.map().setDisplayToFitMapMarkers();
-				getMapPanel().map().removeAllMapMarkers();
+				setStartFinishMapMarkers();
 				}
 		});
 		
@@ -142,10 +170,10 @@ public class MainWindow {
 		    };
 		}
 	      
-	private JFreeChart createChart(final CategoryDataset dataset) {
+	private JFreeChart createChart(final XYSeriesCollection dataset) {
         
         // create the chart...
-        final JFreeChart chart = ChartFactory.createLineChart(
+        final JFreeChart chart = ChartFactory.createXYLineChart(
             "Speed at certain point of route",       // chart title
             "Position in route",                    // domain axis label
             "Speed (kn)",                   // range axis label
@@ -155,6 +183,7 @@ public class MainWindow {
             true,                      // tooltips
             false                      // urls
         );
+        chart.getPlot().setBackgroundPaint( Color.WHITE );
         return chart;
 	}
 	private void initialize() {
@@ -200,6 +229,8 @@ public class MainWindow {
 		
 		graphMapSplitPanel.setLeftComponent(graphPanel);
 		
+		
+		
 		//mapPanel.setVisible(true);
 		graphMapSplitPanel.setRightComponent(mapPanel);
 		
@@ -219,6 +250,17 @@ public class MainWindow {
 	                }
 	                mapPanel.map().setDisplayToFitMapMarkers();
 				}
+	        	int index = 0;
+	        	for(int pointTableID: pointTable.getSelectedRows()){
+	        		index = pointTableID;
+	        	}
+	        	Double x = Double.valueOf(pointTable.getValueAt(index, 0).toString());
+	        	Double y = Double.valueOf(pointTable.getValueAt(index, 3).toString());
+	        	
+	        	//int test2 = (int) pointTable.getValueAt(pointTable.getSelectedRow(), 3);
+	        	
+	        	xCrosshair.setValue(x);
+	            yCrosshair.setValue(y);	 
 	        	
 	           
 	        }
@@ -242,6 +284,7 @@ public class MainWindow {
 			public void actionPerformed(ActionEvent e) {
 				deleteAllButNotSelected();
 				loadDataFromDB();
+				setStartFinishMapMarkers();
 			}
 		});
 		
@@ -253,10 +296,20 @@ public class MainWindow {
 					setStartTime(showSetStartTimeDialog());
 					loadDataFromDB();
 					setEndTime(showSetEndTimeDialog());
+					loadDataFromDB();
+					setStartFinishMapMarkers();
 				} catch (NullPointerException exception) {
 					return;
 				}
-				loadDataFromDB();
+				
+			}
+		});
+		
+		btnSetStartFinishMapMarkers = new JMenuItem("Show Start Finish");
+		popup.add(btnSetStartFinishMapMarkers);
+		btnSetStartFinishMapMarkers.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				setStartFinishMapMarkers();				
 			}
 		});
 		
@@ -273,6 +326,26 @@ public class MainWindow {
 		
 	}
 	
+	private static void setStartFinishMapMarkers(){
+		mapPanel.map().removeAllMapMarkers();
+		MapMarkerDot mapPointStart = new MapMarkerDot(null,  "START", (double) pointTable.getValueAt(0,4),(double) pointTable.getValueAt(0,5));  
+		MapMarkerDot mapPointFinish = new MapMarkerDot(null,  "FINISH", (double) pointTable.getValueAt(pointTable.getModel().getRowCount()-1,4),(double) pointTable.getValueAt(pointTable.getModel().getRowCount()-1,5));
+		if(mapPointStart.getCoordinate().equals(mapPointFinish.getCoordinate()))
+		{
+			MapMarkerDot mapPointOnlyOne = new MapMarkerDot(null,  (String) pointTable.getValueAt(0, 1), (double) pointTable.getValueAt(0,4),(double) pointTable.getValueAt(0,5));
+			getMapPanel().map().addMapMarker(mapPointOnlyOne);
+		}
+		else{
+			getMapPanel().map().addMapMarker(mapPointStart);
+			getMapPanel().map().addMapMarker(mapPointFinish);
+		}
+		mapPanel.map().setDisplayToFitMapPolygons();
+       
+	}
+	
+	
+
+	
 	
 	private void loadDataFromDB(){
 		mapPanel.map().removeAllMapPolygons();
@@ -287,16 +360,97 @@ public class MainWindow {
 		MapPolyline routePolyline = new MapPolyline(JDBCPointDao.mapPointsListCoords);
 		mapPanel.map().addMapPolygon(routePolyline);
 		mapPanel.revalidate();
-		CategoryDataset dataset = jdbcPointDao.dataSet;
+		XYSeriesCollection dataset = jdbcPointDao.dataSet;
 	    JFreeChart chart = createChart(dataset);
 	    ChartPanel chartPanel = new ChartPanel(chart);
 	    chartPanel.setMinimumDrawWidth( 0 );
 	    chartPanel.setMinimumDrawHeight( 0 );
 	    chartPanel.setMaximumDrawWidth( 1920 );
 	    chartPanel.setMaximumDrawHeight( 1200 ); 
+	    chartPanel.addChartMouseListener(new ChartMouseListener(){
+
+			@Override
+			public void chartMouseClicked(ChartMouseEvent event) {  
+			Rectangle2D dataArea = chartPanel.getScreenDataArea();
+            JFreeChart chart = event.getChart();
+            XYPlot plot = (XYPlot) chart.getPlot();
+            ValueAxis xAxis = plot.getDomainAxis();
+            double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, 
+                    RectangleEdge.BOTTOM);
+            // make the crosshairs disappear if the mouse is out of range
+            if (!xAxis.getRange().contains(x)) { 
+                x = Double.NaN;                  
+            }
+            double y = DatasetUtilities.findYValue(plot.getDataset(), 0, x);
+           // y = Math.round(y);
+            x = Math.round(x);
+            
+       	 for (PointDto cord : JDBCPointDao.points) {
+				if(cord.getPointID() == x)
+				{
+					if(pointTable.getSelectionModel() != null){
+						pointTable.getSelectionModel().clearSelection();
+					}
+					for (int i=0; i < pointTable.getModel().getRowCount(); i++) {
+						if(pointTable.getModel().getValueAt(i, 0).equals(cord.getPointID()))
+						{
+							pointTable.setRowSelectionInterval(i,i);
+						}
+					}    						
+					pointTable.scrollRectToVisible(pointTable.getCellRect(pointTable.getSelectedRow(), 0, true));
+					//MainWindow.pointTable.revalidate();    						
+				}   						
+       	 }  
+            
+	        
+				}
+
+			@Override
+			public void chartMouseMoved(ChartMouseEvent event) {
+				{
+		            Rectangle2D dataArea = chartPanel.getScreenDataArea();
+		            JFreeChart chart = event.getChart();
+		            XYPlot plot = (XYPlot) chart.getPlot();
+		            ValueAxis xAxis = plot.getDomainAxis();
+		            double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, 
+		                    RectangleEdge.BOTTOM);
+		            // make the crosshairs disappear if the mouse is out of range
+		            if (!xAxis.getRange().contains(x)) { 
+		                x = Double.NaN;                  
+		            }
+		            double y = DatasetUtilities.findYValue(plot.getDataset(), 0, x);
+		            xCrosshair.setValue(x);
+		            yCrosshair.setValue(y);	 
+	    		 
+				}
+				
+			}
+			
+			
+		});
+	    XYPlot xyPlot = (XYPlot) chart.getPlot();
+	    ValueAxis domainAxis = xyPlot.getDomainAxis();
+	    ValueAxis rangeAxis = xyPlot.getRangeAxis();
+	    NavigableMap<Double,PointDto> pointDtoSortedSpeedMap = new TreeMap<Double,PointDto>();
+	    for (PointDto pointDto : JDBCPointDao.points) {
+	    				pointDtoSortedSpeedMap.put(pointDto.getPointSpeed(),pointDto);
+		}
+	    rangeAxis.setRange(pointDtoSortedSpeedMap.firstEntry().getKey()-0.1,pointDtoSortedSpeedMap.lastEntry().getKey()+0.1);
+	    
+	    CrosshairOverlay crosshairOverlay = new CrosshairOverlay();
+        xCrosshair = new Crosshair(Double.NaN, Color.GRAY, 
+                new BasicStroke(0f));
+        xCrosshair.setLabelVisible(true);
+        yCrosshair = new Crosshair(Double.NaN, Color.GRAY, 
+                new BasicStroke(0f));
+    	yCrosshair.setLabelVisible(true);
+        crosshairOverlay.addDomainCrosshair(xCrosshair);
+        crosshairOverlay.addRangeCrosshair(yCrosshair);
+        chartPanel.addOverlay(crosshairOverlay);
 	    graphPanel.removeAll();
 	    graphPanel.add(chartPanel, BorderLayout.CENTER);
 	    graphPanel.revalidate();
+	    graphPanel.repaint();
 	    graphMapSplitPanel.revalidate();
 	    mapPanel.map().setDisplayToFitMapMarkers();
 	    if(getFilePath() != null){btnLoadRouteData.setEnabled(true);}

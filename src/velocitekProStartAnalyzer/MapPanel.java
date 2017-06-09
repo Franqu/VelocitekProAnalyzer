@@ -97,7 +97,7 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
      button.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(ActionEvent e) {
-             map().setDisplayToFitMapMarkers();             
+             map().setDisplayToFitMapPolygons();             
          }
      });
      JComboBox<TileSource> tileSourceSelector = new JComboBox<>(new TileSource[] {
@@ -269,14 +269,15 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
 							for (int i=0; i < MainWindow.pointTable.getModel().getRowCount(); i++) {
 								if(MainWindow.pointTable.getModel().getValueAt(i, 0).equals(cord.getPointID()))
 								{
-									MainWindow.pointTable.setRowSelectionInterval(MainWindow.pointTable.getSelectedRow(),i);
+									MainWindow.pointTable.addRowSelectionInterval(MainWindow.pointTable.getSelectedRow(),i);
 								}
 							
 						}
 						
 						
-						MainWindow.pointTable.scrollRectToVisible(MainWindow.pointTable.getCellRect(cord.getPointID()-1, 0, true));
-					}   						
+						
+					} 
+						MainWindow.pointTable.scrollRectToVisible(MainWindow.pointTable.getCellRect(MainWindow.pointTable.getSelectedRow(), 0, true));
             	 }
             	 }
              }
@@ -293,7 +294,6 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
 							{
 								MainWindow.pointTable.removeRowSelectionInterval(i,i);
 							}
-						MainWindow.pointTable.scrollRectToVisible(MainWindow.pointTable.getCellRect(cord.getPointID()-1, 0, true));
 						//MainWindow.pointTable.revalidate();    						
 					}   						
             	 }   
@@ -313,7 +313,7 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
     								MainWindow.pointTable.setRowSelectionInterval(i,i);
     							}
 							}    						
-    						MainWindow.pointTable.scrollRectToVisible(MainWindow.pointTable.getCellRect(cord.getPointID()-1, 0, true));
+    						MainWindow.pointTable.scrollRectToVisible(MainWindow.pointTable.getCellRect(MainWindow.pointTable.getSelectedRow(), 0, true));
     						//MainWindow.pointTable.revalidate();    						
     					}   						
                 	 }                    			 

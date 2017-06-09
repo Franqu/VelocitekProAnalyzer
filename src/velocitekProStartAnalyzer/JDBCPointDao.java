@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.MapMarkerDot;	
  
@@ -19,7 +22,9 @@ public class JDBCPointDao implements PointDao {
 	 static List<Coordinate> mapPointsListCoords = new ArrayList<Coordinate>();
 	 static List<PointDto> points = new ArrayList<>();
      Connection connection = null;
-    final DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
+    final  XYSeriesCollection dataSet = new XYSeriesCollection();
+    XYSeries speedTimeSeries = new XYSeries("Point, Speed");
+    XYSeries timeSeries = new XYSeries("Time");
     public Connection getConnection(String fileName){
         try {
             Class.forName("org.sqlite.JDBC");
@@ -65,7 +70,8 @@ public class JDBCPointDao implements PointDao {
 	@Override
     public List<PointDto> select() {
 		points.clear();
-		dataSet.clear();
+		dataSet.removeAllSeries();;
+		speedTimeSeries.clear();
 		mapPointsListCoords.clear();
          try {
                 Statement statement = connection.createStatement();
@@ -80,13 +86,16 @@ public class JDBCPointDao implements PointDao {
                     pointDto.setPointSpeed(resultSet.getDouble("point_speed"));
                     pointDto.setPointLatidude(resultSet.getDouble("point_latitude"));
                     pointDto.setPointLongtidude(resultSet.getDouble("point_longitude"));
-                    dataSet.addValue((Number)  pointDto.getPointSpeed(),"Point ID" ,pointDto.getPointID());
-                    MapMarkerDot mapPoint = new MapMarkerDot(null,  null, pointDto.getPointLatidude(), pointDto.getPointLongtidude());                     
-                    MainWindow.getMapPanel().map().addMapMarker(mapPoint);                  
+                    speedTimeSeries.add(pointDto.getPointID(),pointDto.getPointSpeed());
+                   // dataSet.addValue((Number)  pointDto.getPointSpeed(),"Point ID" ,pointDto.getPointDate());
+                   
+                   /* MapMarkerDot mapPoint = new MapMarkerDot(null,  null, pointDto.getPointLatidude(), pointDto.getPointLongtidude());                     
+                    MainWindow.getMapPanel().map().addMapMarker(mapPoint);         */         
                     Coordinate mapCoordForList = new Coordinate(pointDto.getPointLatidude(),pointDto.getPointLongtidude());	
                     mapPointsListCoords.add(mapCoordForList);
                     points.add(pointDto);
                 }
+                dataSet.addSeries(speedTimeSeries);
                 resultSet.close();
                 statement.close();
                 connection.close();

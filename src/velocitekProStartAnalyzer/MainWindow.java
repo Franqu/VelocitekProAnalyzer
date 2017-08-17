@@ -8,22 +8,22 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.sql.SQLException;
-import java.text.DecimalFormat;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -43,27 +43,15 @@ import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.CategoryAxis;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.NumberTickUnit;
 import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.entity.ChartEntity;
-import org.jfree.chart.entity.XYItemEntity;
 import org.jfree.chart.panel.CrosshairOverlay;
-import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.Crosshair;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.DatasetUtilities;
-import org.jfree.data.xy.XYDataItem;
-import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.RectangleEdge;
 import org.openstreetmap.gui.jmapviewer.MapMarkerDot;
-
-import com.sun.org.apache.xpath.internal.operations.Bool;
 public class MainWindow {
 	
 	private JFrame frame;
@@ -245,7 +233,7 @@ public class MainWindow {
 	        	if(!JDBCPointDao.points.isEmpty()){
 	        		getMapPanel().map().removeAllMapMarkers();
 		        	for (int pointTableID : pointTable.getSelectedRows()) {
-		        		MapMarkerDot mapPoint = new MapMarkerDot(null,  (String) pointTable.getValueAt(pointTableID,1), (double) pointTable.getValueAt(pointTableID,4),(double) pointTable.getValueAt(pointTableID,5));                     
+		        		MapMarkerDot mapPoint = new MapMarkerDot(null,  null, (double) pointTable.getValueAt(pointTableID,4),(double) pointTable.getValueAt(pointTableID,5));                     
 		                if(!getMapPanel().map().getMapMarkerList().contains(mapPoint)){
 		             	   getMapPanel().map().addMapMarker(mapPoint);
 		                }
@@ -316,6 +304,34 @@ public class MainWindow {
 			}
 		});
 		
+		btnSetStartTime = new JMenuItem("Save Map As PNG");
+		popup.add(btnSetStartTime);
+		btnSetStartTime.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					saveMapAsPng(mapPanel);
+					statusLabel.setText("Map Screenshot Saved");
+				} catch (NullPointerException exception) {
+					return;
+				}
+				
+			}
+		});
+		
+		btnSetStartTime = new JMenuItem("Save Table As PNG");
+		popup.add(btnSetStartTime);
+		btnSetStartTime.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					saveTableAsPng(tableContainer);
+					statusLabel.setText("Table Screenshot Saved");
+				} catch (NullPointerException exception) {
+					return;
+				}
+				
+			}
+		});
+		
 		    
 	    //Add listener to components that can bring up popup menus.
 	    MouseListener popupListener = new PopupListener();
@@ -347,6 +363,36 @@ public class MainWindow {
 	       
 		}
 	
+	}
+	
+	private void saveMapAsPng(JPanel panel){
+		 BufferedImage bufImage = new BufferedImage(panel.getSize().width, panel.getSize().height,BufferedImage.TYPE_INT_RGB);
+	       panel.paint(bufImage.createGraphics());
+	       DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+	       Date date = new Date();
+	       
+	       File imageFile = new File("."+File.separator+"\\MapScreenshot "+dateFormat.format(date)+".png" );
+	      // File imageFile = new File("C:\\MJ_NETCLINIC\\asd.png");
+	    try{
+	        imageFile.createNewFile();
+	        ImageIO.write(bufImage, "jpeg", imageFile);
+	    }catch(Exception ex){
+	    }
+	}
+	
+	private void saveTableAsPng(JScrollPane panel){
+		 BufferedImage bufImage = new BufferedImage(panel.getSize().width, panel.getSize().height,BufferedImage.TYPE_INT_RGB);
+	       panel.paint(bufImage.createGraphics());
+	       DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+	       Date date = new Date();
+	       
+	       File imageFile = new File("."+File.separator+"\\TableScreenshot "+dateFormat.format(date)+".png" );
+	      // File imageFile = new File("C:\\MJ_NETCLINIC\\asd.png");
+	    try{
+	        imageFile.createNewFile();
+	        ImageIO.write(bufImage, "jpeg", imageFile);
+	    }catch(Exception ex){
+	    }
 	}
 	
 	
@@ -387,8 +433,7 @@ public class MainWindow {
             if (!xAxis.getRange().contains(x)) { 
                 x = Double.NaN;                  
             }
-            double y = DatasetUtilities.findYValue(plot.getDataset(), 0, x);
-           // y = Math.round(y);
+
             x = Math.round(x);
             
        	 for (PointDto cord : JDBCPointDao.points) {
@@ -435,7 +480,6 @@ public class MainWindow {
 			
 		});
 	    XYPlot xyPlot = (XYPlot) chart.getPlot();
-	    ValueAxis domainAxis = xyPlot.getDomainAxis();
 	    ValueAxis rangeAxis = xyPlot.getRangeAxis();
 	    NavigableMap<Double,PointDto> pointDtoSortedSpeedMap = new TreeMap<Double,PointDto>();
 	    
@@ -627,6 +671,7 @@ public class MainWindow {
 	            	setFilePath(file.getPath());
 	            readXmlFile.ReadXmlFile(getFilePath());
 	            loadDataFromDB();
+	            setStartFinishMapMarkers();
 	            statusLabel.setText("File Loaded :" + file.getName());
 	            }
 	            else

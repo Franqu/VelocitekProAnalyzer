@@ -1,13 +1,5 @@
 package velocitekProStartAnalyzer;
 
-import javax.swing.*;
-import javax.swing.text.JTextComponent;
-import javax.swing.undo.UndoManager;
-import java.awt.*;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 

@@ -368,31 +368,51 @@ public class MainWindow {
 	private void saveMapAsPng(JPanel panel){
 		 BufferedImage bufImage = new BufferedImage(panel.getSize().width, panel.getSize().height,BufferedImage.TYPE_INT_RGB);
 	       panel.paint(bufImage.createGraphics());
-	       DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-	       Date date = new Date();
+	       //DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+	      // Date date = new Date();
 	       
-	       File imageFile = new File("."+File.separator+"\\MapScreenshot "+dateFormat.format(date)+".png" );
+	       //File imageFile = new File("."+File.separator+"\\MapScreenshot "+dateFormat.format(date)+".png" );
+	       
+	       JFileChooser fileChooser = new JFileChooser();
+	       fileChooser.setDialogTitle("Specify a file to save");   
+	        
+	       int userSelection = fileChooser.showSaveDialog(frame);
+	        
+	       if (userSelection == JFileChooser.APPROVE_OPTION) {
+	           File fileToSave = new File(fileChooser.getSelectedFile()+".png");
+	           System.out.println("Save as file: " + fileToSave.getAbsolutePath());
+	           try{
+	   	    	fileToSave.createNewFile();
+	   	        ImageIO.write(bufImage, "png", fileToSave);
+	   	    }catch(Exception ex){
+	   	    }
+	       }
+	       
 	      // File imageFile = new File("C:\\MJ_NETCLINIC\\asd.png");
-	    try{
-	        imageFile.createNewFile();
-	        ImageIO.write(bufImage, "jpeg", imageFile);
-	    }catch(Exception ex){
-	    }
+	   
 	}
 	
 	private void saveTableAsPng(JScrollPane panel){
 		 BufferedImage bufImage = new BufferedImage(panel.getSize().width, panel.getSize().height,BufferedImage.TYPE_INT_RGB);
 	       panel.paint(bufImage.createGraphics());
-	       DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-	       Date date = new Date();
+	       ///DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+	       ///Date date = new Date();
 	       
-	       File imageFile = new File("."+File.separator+"\\TableScreenshot "+dateFormat.format(date)+".png" );
-	      // File imageFile = new File("C:\\MJ_NETCLINIC\\asd.png");
-	    try{
-	        imageFile.createNewFile();
-	        ImageIO.write(bufImage, "jpeg", imageFile);
-	    }catch(Exception ex){
-	    }
+	     ///  File imageFile = new File("."+File.separator+"\\TableScreenshot "+dateFormat.format(date)+".png" );
+	       JFileChooser fileChooser = new JFileChooser();
+	       fileChooser.setDialogTitle("Specify a file to save");   
+	        
+	       int userSelection = fileChooser.showSaveDialog(frame);
+	        
+	       if (userSelection == JFileChooser.APPROVE_OPTION) {
+	           File fileToSave = new File(fileChooser.getSelectedFile()+".png");
+	           System.out.println("Save as file: " + fileToSave.getAbsolutePath());
+	           try{
+	   	    	fileToSave.createNewFile();
+	   	        ImageIO.write(bufImage, "png", fileToSave);
+	   	    }catch(Exception ex){
+	   	    }
+	       }
 	}
 	
 	

@@ -76,6 +76,7 @@ public class MainWindow {
     private Crosshair yCrosshair;
 	static String dbName = "VelocitekProAnalyzerDB.db";
 	static JPopupMenu popup;
+	static  MouseListener popupListener = new PopupListener();
 	public static MapPanel getMapPanel() {
 		return mapPanel;
 	}
@@ -237,7 +238,7 @@ public class MainWindow {
 		                if(!getMapPanel().map().getMapMarkerList().contains(mapPoint)){
 		             	   getMapPanel().map().addMapMarker(mapPoint);
 		                }
-		                mapPanel.map().setDisplayToFitMapMarkers();
+		               // mapPanel.map().setDisplayToFitMapMarkers();
 					}
 		        	int index = 0;
 		        	for(int pointTableID: pointTable.getSelectedRows()){
@@ -334,12 +335,12 @@ public class MainWindow {
 		
 		    
 	    //Add listener to components that can bring up popup menus.
-	    MouseListener popupListener = new PopupListener();
+	   
 	    frame.addMouseListener(popupListener);
 	    graphMapSplitPanel.addMouseListener(popupListener);
 	    tableContainer.addMouseListener(popupListener);
 	    pointTable.addMouseListener(popupListener);
-		    
+		mapPanel.addMouseListener(popupListener);    
 	
 		
 		

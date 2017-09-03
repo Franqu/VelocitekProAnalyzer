@@ -69,7 +69,7 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
      JPanel panelTop = new JPanel();
      JPanel panelBottom = new JPanel();
      JPanel helpPanel = new JPanel();
-
+     
      mperpLabelName = new JLabel("Meters/Pixels: ");
      mperpLabelValue = new JLabel(String.format("%s", map().getMeterPerPixel()));
 
@@ -307,6 +307,10 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
     					}   						
                 	 }                    			 
     		 }
+             else if(SwingUtilities.isRightMouseButton(e))
+             {
+            	 map().addMouseListener(MainWindow.popupListener);
+             }
     	 }
     		 
     		

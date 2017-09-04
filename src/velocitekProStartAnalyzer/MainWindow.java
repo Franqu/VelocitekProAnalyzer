@@ -225,15 +225,14 @@ public class MainWindow {
 
 	            if (isMaximized && !wasMaximized) {
 	            	SwingUtilities.invokeLater(new Runnable() {
-
 	                    @Override
 	                    public void run() {
 	                    	defaultSize();
 	                    }
 	                });
-	            } else if (wasMaximized && !isMaximized) {
+	            } 
+	            else if (wasMaximized && !isMaximized) {
 	            	SwingUtilities.invokeLater(new Runnable() {
-
 	                    @Override
 	                    public void run() {
 	                    	defaultSize();
@@ -254,13 +253,7 @@ public class MainWindow {
 				loadDataFromDB();
 			}
 		});
-		btnLoadRouteData = new JButton("Resize windows");
-		btnPanel.add(btnLoadRouteData);
-		btnLoadRouteData.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				defaultSize();
-			}
-		});
+	
 		
 		
 						
@@ -393,6 +386,19 @@ public class MainWindow {
 				try {
 					saveTableAsPng(tableContainer);
 					statusLabel.setText("Table Screenshot Saved");
+				} catch (NullPointerException exception) {
+					return;
+				}
+				
+			}
+		});
+		
+		JMenuItem btnResizeWindow = new JMenuItem("Resize windows");
+		popup.add(btnResizeWindow);
+		btnResizeWindow.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					defaultSize();
 				} catch (NullPointerException exception) {
 					return;
 				}

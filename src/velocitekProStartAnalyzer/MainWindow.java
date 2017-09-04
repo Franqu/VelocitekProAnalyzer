@@ -68,7 +68,8 @@ public class MainWindow {
 	private JScrollPane scrollTable;
 	private JPanel tablePanel;
 	private JScrollPane tableContainer;
-	private JSplitPane graphMapSplitPanel;
+	static JSplitPane graphMapSplitPanel;
+	static JSplitPane tableGraphMapSplitPanel;
 	private JLabel statusLabel = new JLabel();
 	private JPanel graphPanel = new JPanel(new BorderLayout());
 	private JMenuItem btnDeleteSelected;
@@ -111,8 +112,17 @@ public class MainWindow {
 				setStartFinishMapMarkers();
 				}
 		});
+		SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+            	tableGraphMapSplitPanel.setDividerLocation(tableGraphMapSplitPanel.getSize().height /2);
+            	graphMapSplitPanel.setDividerLocation(graphMapSplitPanel.getSize().width/2);
+            }
+        });
+    }
 		
-	}
+	
 
 	/**
 	 * Create the application.
@@ -195,6 +205,7 @@ public class MainWindow {
 		frame = new JFrame();
 		frame.setBounds(1, 1, 1280, 720);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
 		setScrollTable(new JScrollPane());
 		
@@ -222,15 +233,23 @@ public class MainWindow {
 		tableContainer.setPreferredSize(new Dimension(250,250));
 		
 		frame.getContentPane().add(tableContainer, BorderLayout.SOUTH);
-		
+		//Dimension dimTableGraphMapS
 		graphMapSplitPanel = new JSplitPane();
+		tableGraphMapSplitPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		//tableGraphMapSplitPanel.getTopComponent().set
 		graphMapSplitPanel.setResizeWeight(.5d);
-		frame.getContentPane().add(graphMapSplitPanel, BorderLayout.CENTER);
+		//frame.getContentPane().add(graphMapSplitPanel, BorderLayout.CENTER);
+		frame.getContentPane().add(tableGraphMapSplitPanel, BorderLayout.CENTER);
+		JPanel helpPanel = new JPanel();
+		 JLabel helpLabel = new JLabel("Hold right mouse button to move,\n "
+	             + "left double click or mouse wheel to zoom, left click to select point ");
+	     helpPanel.add(helpLabel);
+		graphPanel.add(helpPanel, BorderLayout.SOUTH);
 		
-		graphMapSplitPanel.setLeftComponent(graphPanel);
+		tableGraphMapSplitPanel.setTopComponent(graphMapSplitPanel);
+		tableGraphMapSplitPanel.setBottomComponent(tableContainer);
 		
-		
-		
+		graphMapSplitPanel.setLeftComponent(graphPanel);				
 		//mapPanel.setVisible(true);
 		graphMapSplitPanel.setRightComponent(mapPanel);
 		

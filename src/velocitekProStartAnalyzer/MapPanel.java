@@ -74,7 +74,6 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
      JPanel panelTop = new JPanel();
      JPanel panelBottom = new JPanel();
      JPanel helpPanel = new JPanel();
-     
      mperpLabelName = new JLabel("Meters/Pixels: ");
      mperpLabelValue = new JLabel(String.format("%s", Math.round(map().getMeterPerPixel())));
 
@@ -135,14 +134,14 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
      });
      panelBottom.add(showTreeLayers);*/
      ///
-     final JCheckBox showToolTip = new JCheckBox("ToolTip visible");
+    /* final JCheckBox showToolTip = new JCheckBox("ToolTip visible");
      showToolTip.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(ActionEvent e) {
              map().setToolTipText(null);
          }
-     });
-     panelBottom.add(showToolTip);
+     });*/
+    // panelBottom.add(showToolTip);
      ///
      final JCheckBox showTileGrid = new JCheckBox("Tile grid visible");
      showTileGrid.setSelected(map().isTileGridVisible());
@@ -153,7 +152,7 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
          }
      });
      panelBottom.add(showTileGrid);
-     showToolTip.setSelected(true);
+   //  showToolTip.setSelected(true);
      final JCheckBox showZoomControls = new JCheckBox("Show zoom controls");
      showZoomControls.setSelected(map().getZoomControlsVisible());
      showZoomControls.addActionListener(new ActionListener() {
@@ -204,7 +203,7 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
              } else {
                  map().setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
              }
-             if (showToolTip.isSelected()/* || map().getMapMarkerList().contains(JDBCPointDao.mapPointsListCoords)*/)
+             
              {
             	 for (PointDto cord : JDBCPointDao.points) {
 /*            		 String TEST = new DecimalFormat("#.####",otherSymbols).format(cord.getPointLatidude());
@@ -214,10 +213,10 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
 						{
 							map().setToolTipText(
 								"ID: "+Integer.toString(cord.getPointID())
-								+" Lat: " + cord.getPointLatidude()
-								+" Lon: " + cord.getPointLongtidude()
-								+" Speed: "+ cord.getPointSpeed()
-								+" Heading: " + cord.getPointHeading()
+								+" Lat: " + Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLatidude()))
+								+" Lon: " + Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLongtidude()))
+								+" Speed: "+ Double.valueOf(new DecimalFormat("#.#",otherSymbols).format(cord.getPointSpeed()))
+								+" Heading: " + Math.round(Double.valueOf(new DecimalFormat("#",otherSymbols).format(cord.getPointHeading())))
 								+ " Hour: " + cord.getPointDate()
 								);
 							  map().removeMapMarker(getMapPoint());

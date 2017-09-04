@@ -29,6 +29,7 @@ import javax.swing.SwingUtilities;
 
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.JMapViewerTree;
+import org.openstreetmap.gui.jmapviewer.MapMarkerDot;
 import org.openstreetmap.gui.jmapviewer.OsmTileLoader;
 import org.openstreetmap.gui.jmapviewer.Style;
 import org.openstreetmap.gui.jmapviewer.events.JMVCommandEvent;
@@ -50,6 +51,10 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
 
  private final JLabel mperpLabelName;
  private final JLabel mperpLabelValue;
+ private  MapMarkerDot mapPoint;
+ 
+ private final Color colorMapMarkerHover = new Color (0x808080);
+ private final Color colorMapMarkerCircle = new Color (0x000000);
 
  /**
   * Constructs the {@code Demo}.
@@ -206,19 +211,30 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
             		 System.out.println(TEST);*/
 					if(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(c.getLat())))   
 							&& Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(c.getLon()))) )
-						map().setToolTipText(
-						"ID: "+Integer.toString(cord.getPointID())
-						+" Lat: " + cord.getPointLatidude()
-						+" Lon: " + cord.getPointLongtidude()
-						+" Speed: "+ cord.getPointSpeed()
-						+" Heading: " + cord.getPointHeading()
-						+ " Hour: " + cord.getPointDate()
-						);
+						{
+							map().setToolTipText(
+								"ID: "+Integer.toString(cord.getPointID())
+								+" Lat: " + cord.getPointLatidude()
+								+" Lon: " + cord.getPointLongtidude()
+								+" Speed: "+ cord.getPointSpeed()
+								+" Heading: " + cord.getPointHeading()
+								+ " Hour: " + cord.getPointDate()
+								);
+							  map().removeMapMarker(getMapPoint());
+							  setMapPoint(new MapMarkerDot(null,  null, (double) cord.getPointLatidude(),(double) cord.getPointLongtidude()));             
+					            
+					             mapPoint.setColor(colorMapMarkerCircle);
+					             mapPoint.setBackColor(colorMapMarkerHover);
+					             map().addMapMarker(getMapPoint());
+						}
             	 }
              }
          }
      });
      map().addMouseListener(new MouseAdapter() {
+    	
+    	
+    	 
     	 @Override
     	 public void mousePressed(MouseEvent e){
     		 
@@ -338,4 +354,16 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
          updateZoomParameters();
      }
  }
+
+
+
+public MapMarkerDot getMapPoint() {
+	return mapPoint;
+}
+
+
+
+public void setMapPoint(MapMarkerDot mapPoint) {
+	this.mapPoint = mapPoint;
+}
 }

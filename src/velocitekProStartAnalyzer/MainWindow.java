@@ -77,6 +77,8 @@ public class MainWindow {
 	static String dbName = "VelocitekProAnalyzerDB.db";
 	static JPopupMenu popup;
 	static  MouseListener popupListener = new PopupListener();
+	private final Color colorMapMarkerHover = new Color (0x808080);
+	 private final Color colorMapMarkerCircle = new Color (0x000000);
 	public static MapPanel getMapPanel() {
 		return mapPanel;
 	}
@@ -479,7 +481,7 @@ public class MainWindow {
 
 			@Override
 			public void chartMouseMoved(ChartMouseEvent event) {
-				{
+				
 		            Rectangle2D dataArea = chartPanel.getScreenDataArea();
 		            JFreeChart chart = event.getChart();
 		            XYPlot plot = (XYPlot) chart.getPlot();
@@ -493,9 +495,18 @@ public class MainWindow {
 		            double y = DatasetUtilities.findYValue(plot.getDataset(), 0, x);
 		            xCrosshair.setValue(x);
 		            yCrosshair.setValue(y);	 
-	    		 
-				}
-				
+		            for (PointDto cord : JDBCPointDao.points) {
+		            	x = Math.round(x);
+	            	if(cord.getPointID() == x){
+	            		mapPanel.map().removeMapMarker(mapPanel.getMapPoint());
+		            	mapPanel.setMapPoint(new MapMarkerDot(null,  null, (double) cord.getPointLatidude(),(double) cord.getPointLongtidude()));             
+		            	mapPanel.setMapPoint(mapPanel.getMapPoint());
+		            	mapPanel.getMapPoint().setColor(colorMapMarkerCircle);
+		            	mapPanel.getMapPoint().setBackColor(colorMapMarkerHover);
+		            	mapPanel.map().addMapMarker(mapPanel.getMapPoint());
+	            	}
+	            	
+		            }
 			}
 			
 			

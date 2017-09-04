@@ -141,7 +141,7 @@ public class MainWindow {
 	 */
 	private static void defaultSize(){
 		graphMapSplitPanel.setDividerLocation(graphMapSplitPanel.getSize().width/2);
-		tableGraphMapSplitPanel.setDividerLocation(tableGraphMapSplitPanel.getSize().height /2);
+		tableGraphMapSplitPanel.setDividerLocation(tableGraphMapSplitPanel.getSize().height /2 + ( tableGraphMapSplitPanel.getSize().height / 5 ));
     	
 	}
 	private DefaultTableModel buildTableModel(List<PointDto> pointDto){

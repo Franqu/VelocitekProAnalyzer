@@ -247,7 +247,7 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
     		   
     		 
     		 Point p = e.getPoint();
-        	 ICoordinate c = map().getPosition(p);
+        	// ICoordinate c = map().getPosition(p);
         	 DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.ENGLISH);
         	 otherSymbols.setDecimalSeparator('.');       
         	 boolean cursorHand = map().getAttribution().handleAttributionCursor(p);
@@ -259,8 +259,8 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
              
              if(SwingUtilities.isLeftMouseButton(e) && e.isShiftDown()){                   
             	 for (PointDto cord : JDBCPointDao.points) {
-					if(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(c.getLat())))   
-							&& Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(c.getLon()))))
+					if(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(getMapPoint().getLat())))   
+							&& Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(getMapPoint().getLon()))))
 					{
 						if(MainWindow.pointTable.getSelectionModel() == null){
 							for (int i=0; i < MainWindow.pointTable.getModel().getRowCount(); i++) {
@@ -288,8 +288,8 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
              }
              else if(SwingUtilities.isLeftMouseButton(e) && e.isControlDown()){                   
             	 for (PointDto cord : JDBCPointDao.points) {
-					if(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(c.getLat())))   
-							&& Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(c.getLon()))))
+					if(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(getMapPoint().getLat())))   
+							&& Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(getMapPoint().getLon()))))
 					{
 						if(MainWindow.pointTable.getSelectionModel() == null){
 							continue;
@@ -306,8 +306,8 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
 		 }
              else if(SwingUtilities.isLeftMouseButton(e)){                   
                 	 for (PointDto cord : JDBCPointDao.points) {
-    					if(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(c.getLat())))   
-    							&& Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(c.getLon()))))
+    					if(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(getMapPoint().getLat())))   
+    							&& Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(getMapPoint().getLon()))))
     					{
     						if(MainWindow.pointTable.getSelectionModel() != null){
     							MainWindow.pointTable.getSelectionModel().clearSelection();

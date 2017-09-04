@@ -14,11 +14,14 @@ import java.io.File;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -136,19 +139,23 @@ public class MainWindow {
 		    columnNames.add("Speed");
 		    columnNames.add("Latitude");
 		    columnNames.add("Longtitude");
-
+		    DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.ENGLISH);
+       	 	otherSymbols.setDecimalSeparator('.');    
+		    DecimalFormat dfHeading = new DecimalFormat("#",otherSymbols);
+		    DecimalFormat dfSpeed = new DecimalFormat("#.#",otherSymbols);
+		    DecimalFormat dfGeo = new DecimalFormat("#.######",otherSymbols);
 		    // data of the table
 		    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 		    for ( PointDto point : pointDto) {
 			   Vector<Object> vector = new Vector<Object>();
 		        for (int columnIndex = 0 ; columnIndex < columnNames.size(); columnIndex++) {
-		        	
+		        		
 		        	  vector.add((int) 	point.getPointID());
 		        	  vector.add((String) point.getPointDate());
-		        	  vector.add((Double) point.getPointHeading());
-		        	  vector.add((Double) point.getPointSpeed());
-		        	  vector.add((Double) point.getPointLatidude());
-		        	  vector.add((Double) point.getPointLongtidude());
+		        	  vector.add(Math.round(Double.valueOf(dfHeading.format(point.getPointHeading()))));
+		        	  vector.add(Double.valueOf(dfSpeed.format(point.getPointSpeed())));
+		        	  vector.add(Double.valueOf(dfGeo.format(point.getPointLatidude())));
+		        	  vector.add(Double.valueOf(dfGeo.format(point.getPointLongtidude())));
 		        }
 		        data.add(vector);
 		    }

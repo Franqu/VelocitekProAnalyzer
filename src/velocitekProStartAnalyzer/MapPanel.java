@@ -76,7 +76,7 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
      JPanel helpPanel = new JPanel();
      
      mperpLabelName = new JLabel("Meters/Pixels: ");
-     mperpLabelValue = new JLabel(String.format("%s", map().getMeterPerPixel()));
+     mperpLabelValue = new JLabel(String.format("%s", Math.round(map().getMeterPerPixel())));
 
      zoomLabel = new JLabel("Zoom: ");
      zoomValue = new JLabel(String.format("%s", map().getZoom()));
@@ -345,7 +345,7 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
  
  private void updateZoomParameters() {
      if (mperpLabelValue != null)
-         mperpLabelValue.setText(String.format("%s", map().getMeterPerPixel()));
+         mperpLabelValue.setText(String.format("%s", Math.round(map().getMeterPerPixel())));
      if (zoomValue != null)
          zoomValue.setText(String.format("%s", map().getZoom()));
  }

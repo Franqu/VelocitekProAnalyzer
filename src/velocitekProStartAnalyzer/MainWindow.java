@@ -5,9 +5,12 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowStateListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -116,8 +119,7 @@ public class MainWindow {
 
             @Override
             public void run() {
-            	tableGraphMapSplitPanel.setDividerLocation(tableGraphMapSplitPanel.getSize().height /2);
-            	graphMapSplitPanel.setDividerLocation(graphMapSplitPanel.getSize().width/2);
+            	defaultSize();
             }
         });
     }
@@ -137,7 +139,11 @@ public class MainWindow {
 	 * Initialize the contents of the frame.
 	 * @throws SQLException 
 	 */
-	
+	private static void defaultSize(){
+		graphMapSplitPanel.setDividerLocation(graphMapSplitPanel.getSize().width/2);
+		tableGraphMapSplitPanel.setDividerLocation(tableGraphMapSplitPanel.getSize().height /2);
+    	
+	}
 	private DefaultTableModel buildTableModel(List<PointDto> pointDto){
 		// ResultSetMetaData metaData = rs.getMetaData();
 
@@ -212,6 +218,30 @@ public class MainWindow {
 		btnPanel = new JPanel();
 		frame.getContentPane().add(btnPanel, BorderLayout.NORTH);
 		
+		frame.addWindowStateListener(new WindowStateListener() {
+	        public void windowStateChanged(WindowEvent event) {
+	            boolean isMaximized = isMaximized(event.getNewState());
+	            boolean wasMaximized = isMaximized(event.getOldState());
+
+	            if (isMaximized && !wasMaximized) {
+	            	SwingUtilities.invokeLater(new Runnable() {
+
+	                    @Override
+	                    public void run() {
+	                    	defaultSize();
+	                    }
+	                });
+	            } else if (wasMaximized && !isMaximized) {
+	            	SwingUtilities.invokeLater(new Runnable() {
+
+	                    @Override
+	                    public void run() {
+	                    	defaultSize();
+	                    }
+	                });
+	            }
+	        }
+	    });
 		
 		ReadXMLFile readXmlFile = new ReadXMLFile();
 		
@@ -224,13 +254,20 @@ public class MainWindow {
 				loadDataFromDB();
 			}
 		});
+		btnLoadRouteData = new JButton("Resize windows");
+		btnPanel.add(btnLoadRouteData);
+		btnLoadRouteData.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				defaultSize();
+			}
+		});
 		
 		
 						
 		btnPanel.add(btnShowFileDialogButton);
 	
 		tableContainer = new JScrollPane(pointTable);
-		tableContainer.setPreferredSize(new Dimension(250,250));
+		//tableContainer.setPreferredSize(new Dimension(250,250));
 		
 		frame.getContentPane().add(tableContainer, BorderLayout.SOUTH);
 		//Dimension dimTableGraphMapS
@@ -884,6 +921,10 @@ public class MainWindow {
 					             + "You can't!");
 					}
 	}*/
+	 
+ private static boolean isMaximized(int state) {
+	    return (state & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH;
+}
 
 public JScrollPane getScrollTable() {
 	return scrollTable;

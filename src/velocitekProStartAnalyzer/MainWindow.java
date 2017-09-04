@@ -73,6 +73,7 @@ public class MainWindow {
 	private JScrollPane tableContainer;
 	static JSplitPane graphMapSplitPanel;
 	static JSplitPane tableGraphMapSplitPanel;
+	static JLabel dataAnalysisLabel = new JLabel("TESTSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS ");
 	private JLabel statusLabel = new JLabel();
 	private JPanel graphPanel = new JPanel(new BorderLayout());
 	private JMenuItem btnDeleteSelected;
@@ -87,7 +88,8 @@ public class MainWindow {
 	static JPopupMenu popup;
 	static  MouseListener popupListener = new PopupListener();
 	private final Color colorMapMarkerHover = new Color (0x808080);
-	 private final Color colorMapMarkerCircle = new Color (0x000000);
+	private final Color colorMapMarkerCircle = new Color (0x000000);
+	private Double minSpeed;
 	public static MapPanel getMapPanel() {
 		return mapPanel;
 	}
@@ -266,26 +268,23 @@ public class MainWindow {
 		
 						
 		btnPanel.add(btnShowFileDialogButton);
-	
-		tableContainer = new JScrollPane(pointTable);
-		//tableContainer.setPreferredSize(new Dimension(250,250));
 		
+		tableContainer = new JScrollPane(pointTable);
 		frame.getContentPane().add(tableContainer, BorderLayout.SOUTH);
-		//Dimension dimTableGraphMapS
 		graphMapSplitPanel = new JSplitPane();
 		tableGraphMapSplitPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-		//tableGraphMapSplitPanel.getTopComponent().set
 		graphMapSplitPanel.setResizeWeight(.5d);
-		//frame.getContentPane().add(graphMapSplitPanel, BorderLayout.CENTER);
 		frame.getContentPane().add(tableGraphMapSplitPanel, BorderLayout.CENTER);
-		JPanel helpPanel = new JPanel();
-		 JLabel helpLabel = new JLabel("Hold right mouse button to move,\n "
-	             + "left double click or mouse wheel to zoom, left click to select point ");
-	     helpPanel.add(helpLabel);
-		graphPanel.add(helpPanel, BorderLayout.SOUTH);
+		JPanel dataAnalysisPanel = new JPanel();
+		JLabel dataAnalysisLabel = new JLabel("TESTSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS ");
+	    dataAnalysisPanel.add(dataAnalysisLabel);
+	    JPanel tableContainerPanel = new JPanel(new BorderLayout());
+	    tableContainerPanel.add(dataAnalysisPanel, BorderLayout.NORTH);
+	    tableContainerPanel.add(tableContainer);
+			
 		
 		tableGraphMapSplitPanel.setTopComponent(graphMapSplitPanel);
-		tableGraphMapSplitPanel.setBottomComponent(tableContainer);
+		tableGraphMapSplitPanel.setBottomComponent(tableContainerPanel);
 		
 		graphMapSplitPanel.setLeftComponent(graphPanel);				
 		//mapPanel.setVisible(true);
@@ -338,7 +337,7 @@ public class MainWindow {
 			}
 		});
 		
-		btnDeleteAllButNotSelected = new JMenuItem("Delete Not Selected");
+		btnDeleteAllButNotSelected = new JMenuItem("Set Selected as New Database");
 		popup.add(btnDeleteAllButNotSelected);
 		btnDeleteAllButNotSelected.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -373,7 +372,7 @@ public class MainWindow {
 			}
 		});
 		
-		btnSetStartTime = new JMenuItem("Save Map As PNG");
+		btnSetStartTime = new JMenuItem("Save Map as PNG");
 		popup.add(btnSetStartTime);
 		btnSetStartTime.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -387,7 +386,7 @@ public class MainWindow {
 			}
 		});
 		
-		btnSetStartTime = new JMenuItem("Save Table As PNG");
+		btnSetStartTime = new JMenuItem("Save Table as PNG");
 		popup.add(btnSetStartTime);
 		btnSetStartTime.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -401,7 +400,7 @@ public class MainWindow {
 			}
 		});
 		
-		JMenuItem btnResizeWindow = new JMenuItem("Resize windows");
+		JMenuItem btnResizeWindow = new JMenuItem("Resize Windows");
 		popup.add(btnResizeWindow);
 		btnResizeWindow.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -887,54 +886,7 @@ public class MainWindow {
 			return temp.toArray();
 
 		  }
-	 
 	
-	/*private void showSetTimerTEST(){
-		final JOptionPane optionPane = new JOptionPane(
-                "The only way to close this dialog is by\n"
-                + "pressing one of the following buttons.\n"
-                + "Do you understand?",
-                JOptionPane.QUESTION_MESSAGE,
-                JOptionPane.YES_NO_OPTION);
-
-					final JDialog dialog = new JDialog(frame, 
-					                             "Click a button",
-					                             true);
-					dialog.setContentPane(optionPane);
-					dialog.setDefaultCloseOperation(
-					    JDialog.DO_NOTHING_ON_CLOSE);
-					dialog.addWindowListener(new WindowAdapter() {
-					    public void windowClosing(WindowEvent we) {
-					        setLabel("Thwarted user attempt to close window.");
-					    }
-					});
-					optionPane.addPropertyChangeListener(
-					    new PropertyChangeListener() {
-					        public void propertyChange(PropertyChangeEvent e) {
-					            String prop = e.getPropertyName();
-					
-					            if (dialog.isVisible() 
-					             && (e.getSource() == optionPane)
-					             && (prop.equals(JOptionPane.VALUE_PROPERTY))) {
-					                //If you were going to check something
-					                //before closing the window, you'd do
-					                //it here.
-					                dialog.setVisible(false);
-					            }
-					        }
-					    });
-					dialog.pack();
-					dialog.setVisible(true);
-					
-					int value = ((Integer)optionPane.getValue()).intValue();
-					if (value == JOptionPane.YES_OPTION) {
-					    setLabel("Good.");
-					} else if (value == JOptionPane.NO_OPTION) {
-					    setLabel("Try using the window decorations "
-					             + "to close the non-auto-closing dialog. "
-					             + "You can't!");
-					}
-	}*/
 	 
  private static boolean isMaximized(int state) {
 	    return (state & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH;
@@ -962,6 +914,18 @@ public String getFilePath() {
 
 public void setFilePath(String filePath) {
 	this.filePath = filePath;
+}
+
+public Double getMinSpeed() {//TODO:HERE
+	double point = 0;
+	for (PointDto points : JDBCPointDao.points) {
+		if ( points.getPointSpeed() > point) point = points.getPointSpeed();
+	}
+	return minSpeed;
+}
+
+public void setMinSpeed(Double minSpeed) {
+	this.minSpeed = minSpeed;
 }
 	
 }

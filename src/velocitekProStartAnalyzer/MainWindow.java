@@ -120,6 +120,7 @@ public class MainWindow {
             @Override
             public void run() {
             	defaultSize();
+            	
             }
         });
     }
@@ -142,7 +143,14 @@ public class MainWindow {
 	private static void defaultSize(){
 		graphMapSplitPanel.setDividerLocation(graphMapSplitPanel.getSize().width/2);
 		tableGraphMapSplitPanel.setDividerLocation(tableGraphMapSplitPanel.getSize().height /2 + ( tableGraphMapSplitPanel.getSize().height / 5 ));
-    	
+		SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+            	mapPanel.map().setDisplayToFitMapPolygons();
+            	
+            }
+        });
 	}
 	private DefaultTableModel buildTableModel(List<PointDto> pointDto){
 		// ResultSetMetaData metaData = rs.getMetaData();

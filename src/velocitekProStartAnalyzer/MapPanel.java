@@ -306,21 +306,24 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
 		 }
              else if(SwingUtilities.isLeftMouseButton(e)){                   
                 	 for (PointDto cord : JDBCPointDao.points) {
-    					if(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(getMapPoint().getLat())))   
-    							&& Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(getMapPoint().getLon()))))
-    					{
-    						if(MainWindow.pointTable.getSelectionModel() != null){
-    							MainWindow.pointTable.getSelectionModel().clearSelection();
-    						}
-    						for (int i=0; i < MainWindow.pointTable.getModel().getRowCount(); i++) {
-    							if(MainWindow.pointTable.getModel().getValueAt(i, 0).equals(cord.getPointID()))
-    							{
-    								MainWindow.pointTable.setRowSelectionInterval(i,i);
-    							}
-							}    						
-    						MainWindow.pointTable.scrollRectToVisible(MainWindow.pointTable.getCellRect(MainWindow.pointTable.getSelectedRow(), 0, true));
-    						//MainWindow.pointTable.revalidate();    						
-    					}   						
+                		 if(getMapPoint() != null){
+                			 if(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLatidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(getMapPoint().getLat())))   
+         							&& Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(cord.getPointLongtidude())).equals(Double.valueOf(new DecimalFormat("#.####",otherSymbols).format(getMapPoint().getLon()))))
+         					{
+         						if(MainWindow.pointTable.getSelectionModel() != null){
+         							MainWindow.pointTable.getSelectionModel().clearSelection();
+         						}
+         						for (int i=0; i < MainWindow.pointTable.getModel().getRowCount(); i++) {
+         							if(MainWindow.pointTable.getModel().getValueAt(i, 0).equals(cord.getPointID()))
+         							{
+         								MainWindow.pointTable.setRowSelectionInterval(i,i);
+         							}
+     							}    						
+         						MainWindow.pointTable.scrollRectToVisible(MainWindow.pointTable.getCellRect(MainWindow.pointTable.getSelectedRow(), 0, true));
+         						//MainWindow.pointTable.revalidate();    						
+         					}   	
+                		 }
+    										
                 	 }                    			 
     		 }
              else if(SwingUtilities.isRightMouseButton(e))

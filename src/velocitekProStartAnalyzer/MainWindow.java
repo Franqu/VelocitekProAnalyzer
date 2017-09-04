@@ -13,6 +13,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +35,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -460,6 +462,7 @@ public class MainWindow {
             x = Math.round(x);
             
        	 for (PointDto cord : JDBCPointDao.points) {
+       		{
 				if(cord.getPointID() == x)
 				{
 					if(pointTable.getSelectionModel() != null){
@@ -475,7 +478,30 @@ public class MainWindow {
 					//MainWindow.pointTable.revalidate();    						
 				}   						
        	 }  
-            
+            if(SwingUtilities.isLeftMouseButton(event.getTrigger()) && event.getTrigger().isShiftDown()){
+            	if(MainWindow.pointTable.getSelectionModel() == null){
+					for (int i=0; i < MainWindow.pointTable.getModel().getRowCount(); i++) {
+						if(MainWindow.pointTable.getModel().getValueAt(i, 0).equals(cord.getPointID()))
+						{
+							MainWindow.pointTable.setRowSelectionInterval(i,i);
+						}
+					}    			
+				}
+				else{
+					for (int i=0; i < MainWindow.pointTable.getModel().getRowCount(); i++) {
+						if(MainWindow.pointTable.getModel().getValueAt(i, 0).equals(cord.getPointID()))
+						{
+							MainWindow.pointTable.addRowSelectionInterval(MainWindow.pointTable.getSelectedRow(),i);
+						}
+					
+				}
+				
+				
+				
+			} 
+				MainWindow.pointTable.scrollRectToVisible(MainWindow.pointTable.getCellRect(MainWindow.pointTable.getSelectedRow(), 0, true));
+    	 }
+            }
 	        
 				}
 

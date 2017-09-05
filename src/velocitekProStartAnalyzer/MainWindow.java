@@ -59,6 +59,7 @@ public class MainWindow {
 	
 	private JFrame frame;
 	private JButton btnLoadRouteData;
+	private JButton btnSaveAsVCC;
 	JButton btnShowFileDialogButton = new JButton("Open File");
 	//private JDBCPointDao jdbcPointDao; 
 	static JTable pointTable = new JTable();
@@ -259,10 +260,10 @@ public class MainWindow {
 			}
 		});
 		
-		btnLoadRouteData = new JButton("Save as VCC");
-		btnPanel.add(btnLoadRouteData);
-		if(JDBCPointDao.points.isEmpty()){btnLoadRouteData.setEnabled(false);}
-		btnLoadRouteData.addActionListener(new ActionListener() {
+		btnSaveAsVCC = new JButton("Save as VCC");
+		btnPanel.add(btnSaveAsVCC);
+		if(JDBCPointDao.points.isEmpty()){btnSaveAsVCC.setEnabled(false);}
+		btnSaveAsVCC.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				saveNewVCC();
 			}
@@ -457,7 +458,7 @@ public class MainWindow {
 	       
 	       //File imageFile = new File("."+File.separator+"\\MapScreenshot "+dateFormat.format(date)+".png" );
 	       
-	       JFileChooser fileChooser = new JFileChooser();
+	       final JFileChooser fileChooser = new JFileChooser();
 	       fileChooser.setDialogTitle("Specify a file to save");   
 	        
 	       int userSelection = fileChooser.showSaveDialog(frame);
@@ -477,7 +478,7 @@ public class MainWindow {
 	}
 	
 	private void saveNewVCC(){
-			JFileChooser fileChooser = new JFileChooser();
+			final JFileChooser fileChooser = new JFileChooser();
 			fileChooser.setDialogTitle("Specify a file to save");   
 	        SaveXMLFile saveXMLFile = new SaveXMLFile();
 	       int userSelection = fileChooser.showSaveDialog(frame);
@@ -500,7 +501,7 @@ public class MainWindow {
 	       ///Date date = new Date();
 	       
 	     ///  File imageFile = new File("."+File.separator+"\\TableScreenshot "+dateFormat.format(date)+".png" );
-	       JFileChooser fileChooser = new JFileChooser();
+	       final JFileChooser fileChooser = new JFileChooser();
 	       fileChooser.setDialogTitle("Specify a file to save");   
 	        
 	       int userSelection = fileChooser.showSaveDialog(frame);
@@ -667,8 +668,10 @@ public class MainWindow {
 	    graphPanel.repaint();
 	    graphMapSplitPanel.revalidate();
 	    mapPanel.map().setDisplayToFitMapMarkers();
-	    if(JDBCPointDao.points.isEmpty()){btnLoadRouteData.setEnabled(false);}
+	    if(JDBCPointDao.points.isEmpty()){btnSaveAsVCC.setEnabled(false);}
+	    else{btnSaveAsVCC.setEnabled(true);}
 	    if(getFilePath() != null){btnLoadRouteData.setEnabled(true);}
+	    else{btnLoadRouteData.setEnabled(false);}
 	    
 	    if(!JDBCPointDao.points.isEmpty())
 	    {

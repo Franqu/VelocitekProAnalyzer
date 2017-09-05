@@ -44,7 +44,7 @@ import org.w3c.dom.NodeList;
 
 	    			Element eElement = (Element) nNode;
 	    			
-	    			pointDto.setPointDate(eElement.getAttribute("dateTime"));
+	    			pointDto.setPointDateHHmmss(eElement.getAttribute("dateTime"));
 	    			pointDto.setPointHeading(Double.parseDouble(eElement.getAttribute("heading")));
 	    			pointDto.setPointLatidude(Double.parseDouble(eElement.getAttribute("latitude")));
 	    			pointDto.setPointLongtidude(Double.parseDouble(eElement.getAttribute("longitude")));

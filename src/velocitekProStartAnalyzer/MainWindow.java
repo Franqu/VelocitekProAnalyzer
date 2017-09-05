@@ -172,7 +172,7 @@ public class MainWindow {
 		        for (int columnIndex = 0 ; columnIndex < columnNames.size(); columnIndex++) {
 		        		
 		        	  vector.add((int) 	point.getPointID());
-		        	  vector.add((String) point.getPointDate());
+		        	  vector.add((String) point.getPointDateHHmmss());
 		        	  vector.add(Math.round(Double.valueOf(dfHeading.format(point.getPointHeading()))));
 		        	  vector.add(Double.valueOf(dfSpeed.format(point.getPointSpeed())));
 		        	  vector.add(Double.valueOf(dfGeo.format(point.getPointLatidude())));
@@ -256,6 +256,15 @@ public class MainWindow {
 			public void actionPerformed(ActionEvent e) {
 				readXmlFile.ReadXmlFile(getFilePath());
 				loadDataFromDB();
+			}
+		});
+		
+		btnLoadRouteData = new JButton("Save as VCC");
+		btnPanel.add(btnLoadRouteData);
+		if(JDBCPointDao.points.isEmpty()){btnLoadRouteData.setEnabled(false);}
+		btnLoadRouteData.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				saveNewVCC();
 			}
 		});
 	
@@ -467,6 +476,23 @@ public class MainWindow {
 	   
 	}
 	
+	private void saveNewVCC(){
+			JFileChooser fileChooser = new JFileChooser();
+			fileChooser.setDialogTitle("Specify a file to save");   
+	        SaveXMLFile saveXMLFile = new SaveXMLFile();
+	       int userSelection = fileChooser.showSaveDialog(frame);
+	        
+	       if (userSelection == JFileChooser.APPROVE_OPTION) {
+	           File fileToSave = new File(fileChooser.getSelectedFile()+".vcc");
+	           System.out.println("Save as file: " + fileToSave.getAbsolutePath());
+	           try{
+	   	    	fileToSave.createNewFile();
+	   	    	saveXMLFile.saveToVCC(fileToSave.getAbsolutePath());
+	   	    }catch(Exception ex){
+	   	    }
+	       }
+	}
+	
 	private void saveTableAsPng(JScrollPane panel){
 		 BufferedImage bufImage = new BufferedImage(panel.getSize().width, panel.getSize().height,BufferedImage.TYPE_INT_RGB);
 	       panel.paint(bufImage.createGraphics());
@@ -641,17 +667,22 @@ public class MainWindow {
 	    graphPanel.repaint();
 	    graphMapSplitPanel.revalidate();
 	    mapPanel.map().setDisplayToFitMapMarkers();
+	    if(JDBCPointDao.points.isEmpty()){btnLoadRouteData.setEnabled(false);}
 	    if(getFilePath() != null){btnLoadRouteData.setEnabled(true);}
 	    
-	    dataAnalysisLabel.setText(
-	    		" Min Speed: "+dataAnalysis.getMinSpeed()+
-	    		" Max Speed: "+dataAnalysis.getMaxSpeed()+
-	    		" Avg Speed: "+dataAnalysis.getAvgSpeed()+
-	    		" Median Speed: "+dataAnalysis.getMedianSpeed()+
-	    		" Time Elapsed: "+dataAnalysis.elapsedRaceTime(JDBCPointDao.points.get(0).getPointDateMMDDYY()+" "+JDBCPointDao.points.get(0).getPointDate(),
-	    				JDBCPointDao.points.get(JDBCPointDao.points.size()-1).getPointDateMMDDYY()+" "+JDBCPointDao.points.get(JDBCPointDao.points.size()-1).getPointDate()) +
-	    		" Date: "+JDBCPointDao.points.get(1).getPointDateMMDDYY()
-	    		);
+	    if(!JDBCPointDao.points.isEmpty())
+	    {
+	    	 dataAnalysisLabel.setText(
+	 	    		" Min Speed: "+dataAnalysis.getMinSpeed()+
+	 	    		" Max Speed: "+dataAnalysis.getMaxSpeed()+
+	 	    		" Avg Speed: "+dataAnalysis.getAvgSpeed()+
+	 	    		" Median Speed: "+dataAnalysis.getMedianSpeed()+
+	 	    		" Time Elapsed: "+dataAnalysis.elapsedRaceTime(JDBCPointDao.points.get(0).getPointDateMMDDYY()+" "+JDBCPointDao.points.get(0).getPointDateHHmmss(),
+	 	    				JDBCPointDao.points.get(JDBCPointDao.points.size()-1).getPointDateMMDDYY()+" "+JDBCPointDao.points.get(JDBCPointDao.points.size()-1).getPointDateHHmmss()) +
+	 	    		" Date: "+JDBCPointDao.points.get(1).getPointDateMMDDYY()
+	 	    		);
+	    }
+	   
 	    
 
 }
@@ -724,7 +755,7 @@ public class MainWindow {
 		}
 		
 		for (PointDto pointDto : JDBCPointDao.points) {
-			String time = pointDto.getPointDate();
+			String time = pointDto.getPointDateHHmmss();
 			time = time.substring(0,time.length()-3);
 			if(time.equals(startTime)){
 				flagTimeIsInPoints = true;
@@ -734,7 +765,7 @@ public class MainWindow {
 		if(flagTimeIsInPoints.equals(true))
 		{
 			for (PointDto pointDto : JDBCPointDao.points) {
-				String time = pointDto.getPointDate();
+				String time = pointDto.getPointDateHHmmss();
 				time = time.substring(0,time.length()-3);
 				jdbcPointDao.deleteSelected(pointDto.getPointID());	
 				if(time.equals(startTime)){
@@ -767,7 +798,7 @@ public class MainWindow {
 		}
 		
 		for (PointDto pointDto : JDBCPointDao.points) {
-			String time = pointDto.getPointDate();
+			String time = pointDto.getPointDateHHmmss();
 			time = time.substring(0,time.length()-3);
 			if(time.equals(endTime)){
 				flagTimeIsInPoints = true;
@@ -777,7 +808,7 @@ public class MainWindow {
 		if(flagTimeIsInPoints.equals(true))
 		{
 			for (PointDto pointDto : JDBCPointDao.points) {
-				String time = pointDto.getPointDate();
+				String time = pointDto.getPointDateHHmmss();
 				time = time.substring(0,time.length()-3);
 				if(time.equals(endTime)){
 					startDeleting = true;
@@ -815,7 +846,7 @@ public class MainWindow {
 	            readXmlFile.ReadXmlFile(getFilePath());
 	            loadDataFromDB();
 	            setStartFinishMapMarkers();
-	            statusLabel.setText("File Loaded :" + file.getName());
+	            statusLabel.setText("File Loaded: " + file.getName());
 	            }
 	            else
 	            {
@@ -834,9 +865,9 @@ public class MainWindow {
 
 				String time = "Checking";
 				for (PointDto pointDto : JDBCPointDao.points) {
-					if(!time.equals(pointDto.getPointDate().substring(0,pointDto.getPointDate().length()-3)))
+					if(!time.equals(pointDto.getPointDateHHmmss().substring(0,pointDto.getPointDateHHmmss().length()-3)))
 					{
-						time = pointDto.getPointDate();
+						time = pointDto.getPointDateHHmmss();
 						time = time.substring(0,time.length()-3);
 						hoursInPoints = appendValue(hoursInPoints, time);
 					}
@@ -861,9 +892,9 @@ public class MainWindow {
 
 		String time = "Checking";
 		for (PointDto pointDto : JDBCPointDao.points) {
-			if(!time.equals(pointDto.getPointDate().substring(0,pointDto.getPointDate().length()-3)))
+			if(!time.equals(pointDto.getPointDateHHmmss().substring(0,pointDto.getPointDateHHmmss().length()-3)))
 			{
-				time = pointDto.getPointDate();
+				time = pointDto.getPointDateHHmmss();
 				time = time.substring(0,time.length()-3);
 				hoursInPoints = appendValue(hoursInPoints, time);
 			}

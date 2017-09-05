@@ -217,7 +217,7 @@ public class MapPanel extends JPanel implements JMapViewerEventListener {
 								+" Lon: " + Double.valueOf(new DecimalFormat("#.#####",otherSymbols).format(cord.getPointLongtidude()))
 								+" Speed: "+ Double.valueOf(new DecimalFormat("#.#",otherSymbols).format(cord.getPointSpeed()))
 								+" Heading: " + Math.round(Double.valueOf(new DecimalFormat("#",otherSymbols).format(cord.getPointHeading())))
-								+ " Hour: " + cord.getPointDate()
+								+ " Hour: " + cord.getPointDateHHmmss()
 								);
 							  map().removeMapMarker(getMapPoint());
 							  setMapPoint(new MapMarkerDot(null,  null, (double) cord.getPointLatidude(),(double) cord.getPointLongtidude()));             

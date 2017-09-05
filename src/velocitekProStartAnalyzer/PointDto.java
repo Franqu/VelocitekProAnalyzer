@@ -2,12 +2,14 @@ package velocitekProStartAnalyzer;
 
 public class PointDto {
 	private int pointID;
-	private String pointDate;
+	private String pointDateHHmmss;
 	private String pointDateMMDDYY;
 	private double pointHeading;
 	private double pointSpeed;
 	private double pointLatidude;
 	private double pointLongtidude;
+	private String pointDate;
+	
 	
 	public int getPointID() {
 		return pointID;
@@ -15,11 +17,11 @@ public class PointDto {
 	public void setPointID(int pointID) {
 		this.pointID = pointID;
 	}
-	public String getPointDate() {
-		return pointDate;
+	public String getPointDateHHmmss() {
+		return pointDateHHmmss;
 	}
-	public void setPointDate(String pointDate) {
-		this.pointDate = pointDate;
+	public void setPointDateHHmmss(String pointDate) {
+		this.pointDateHHmmss = pointDate;
 	}
 	public double getPointHeading() {
 		return pointHeading;
@@ -45,19 +47,25 @@ public class PointDto {
 	public void setPointLongtidude(double pointLongtidude) {
 		this.pointLongtidude = pointLongtidude;
 	}
-	@Override
-	public String toString() {
-		return "Point [pointID=" + pointID + ", pointDate=" + pointDate + ", pointHeading=" + pointHeading
-				+ ", pointSpeed=" + pointSpeed + ", pointLatidude=" + pointLatidude + ", pointLongtidude="
-				+ pointLongtidude + "]";
-	}
+	
 	public String getPointDateMMDDYY() {
 		return pointDateMMDDYY;
 	}
 	public void setPointDateMMDDYY(String pointDateMMDDYY) {
 		this.pointDateMMDDYY = pointDateMMDDYY;
 	}
+	public String getPointDate() {
+		return pointDate;
+	}
+	public void setPointDate(String pointDate) {
+		this.pointDate = pointDate;
+	}
 	
-	
+	@Override
+	public String toString() {
+		return "PointDto [pointID=" + pointID + ", pointDateHHmmss=" + pointDateHHmmss + ", pointDateMMDDYY="
+				+ pointDateMMDDYY + ", pointHeading=" + pointHeading + ", pointSpeed=" + pointSpeed + ", pointLatidude="
+				+ pointLatidude + ", pointLongtidude=" + pointLongtidude + ", pointDate=" + pointDate + "]";
+	}
 
 }

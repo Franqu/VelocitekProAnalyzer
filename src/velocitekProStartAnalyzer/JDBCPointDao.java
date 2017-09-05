@@ -78,8 +78,9 @@ public class JDBCPointDao implements PointDao {
                 while(resultSet.next()){
                 	PointDto pointDto = new PointDto();
                     pointDto.setPointID(Integer.parseInt(resultSet.getString("idpoint_data")));
-                    pointDto.setPointDate(resultSet.getString("point_date").substring(11, resultSet.getString("point_date").length() - 6));
+                    pointDto.setPointDateHHmmss(resultSet.getString("point_date").substring(11, resultSet.getString("point_date").length() - 6));
                     pointDto.setPointDateMMDDYY(resultSet.getString("point_date").substring(0,resultSet.getString("point_date").length() - 15));
+                    pointDto.setPointDate(resultSet.getString("point_date"));
                     pointDto.setPointHeading(resultSet.getDouble("point_heading"));
                     pointDto.setPointSpeed(resultSet.getDouble("point_speed"));
                     pointDto.setPointLatidude(resultSet.getDouble("point_latitude"));
@@ -130,7 +131,7 @@ public class JDBCPointDao implements PointDao {
 	    		connection.setAutoCommit(false);
 	    		
 	    		PreparedStatement stmt=connection.prepareStatement("INSERT INTO point_data (point_date, point_heading, point_speed, point_latitude, point_longitude) VALUES (?,?,?,?,?);");
-	    		stmt.setString(1, pointDto.getPointDate());
+	    		stmt.setString(1, pointDto.getPointDateHHmmss());
 	    		stmt.setDouble(2, pointDto.getPointHeading());
 	    		stmt.setDouble(3, pointDto.getPointSpeed());
 	    		stmt.setDouble(4, pointDto.getPointLatidude());

@@ -73,7 +73,7 @@ public class MainWindow {
 	private JScrollPane tableContainer;
 	static JSplitPane graphMapSplitPanel;
 	static JSplitPane tableGraphMapSplitPanel;
-	static JLabel dataAnalysisLabel = new JLabel("TESTSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS ");
+	static JLabel dataAnalysisLabel = new JLabel();
 	private JLabel statusLabel = new JLabel();
 	private JPanel graphPanel = new JPanel(new BorderLayout());
 	private JMenuItem btnDeleteSelected;
@@ -89,7 +89,7 @@ public class MainWindow {
 	static  MouseListener popupListener = new PopupListener();
 	private final Color colorMapMarkerHover = new Color (0x808080);
 	private final Color colorMapMarkerCircle = new Color (0x000000);
-	private Double minSpeed;
+	private DataAnalysis dataAnalysis = new DataAnalysis();
 	public static MapPanel getMapPanel() {
 		return mapPanel;
 	}
@@ -276,8 +276,7 @@ public class MainWindow {
 		graphMapSplitPanel.setResizeWeight(.5d);
 		frame.getContentPane().add(tableGraphMapSplitPanel, BorderLayout.CENTER);
 		JPanel dataAnalysisPanel = new JPanel();
-		JLabel dataAnalysisLabel = new JLabel("TESTSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS ");
-	    dataAnalysisPanel.add(dataAnalysisLabel);
+		dataAnalysisPanel.add(dataAnalysisLabel);
 	    JPanel tableContainerPanel = new JPanel(new BorderLayout());
 	    tableContainerPanel.add(dataAnalysisPanel, BorderLayout.NORTH);
 	    tableContainerPanel.add(tableContainer);
@@ -649,6 +648,16 @@ public class MainWindow {
 	    mapPanel.map().setDisplayToFitMapMarkers();
 	    if(getFilePath() != null){btnLoadRouteData.setEnabled(true);}
 	    
+	    dataAnalysisLabel.setText(
+	    		" Min Speed: "+dataAnalysis.getMinSpeed()+
+	    		" Max Speed: "+dataAnalysis.getMaxSpeed()+
+	    		" Avg Speed: "+dataAnalysis.getAvgSpeed()+
+	    		" Median Speed: "+dataAnalysis.getMedianSpeed()+
+	    		" Time Elapsed: "+dataAnalysis.elapsedRaceTime(JDBCPointDao.points.get(0).getPointDateMMDDYY()+" "+JDBCPointDao.points.get(0).getPointDate(),
+	    				JDBCPointDao.points.get(JDBCPointDao.points.size()-1).getPointDateMMDDYY()+" "+JDBCPointDao.points.get(JDBCPointDao.points.size()-1).getPointDate()) +
+	    		" Date: "+JDBCPointDao.points.get(1).getPointDateMMDDYY()
+	    		);
+	    
 
 }
 	
@@ -916,16 +925,5 @@ public void setFilePath(String filePath) {
 	this.filePath = filePath;
 }
 
-public Double getMinSpeed() {//TODO:HERE
-	double point = 0;
-	for (PointDto points : JDBCPointDao.points) {
-		if ( points.getPointSpeed() > point) point = points.getPointSpeed();
-	}
-	return minSpeed;
-}
 
-public void setMinSpeed(Double minSpeed) {
-	this.minSpeed = minSpeed;
-}
-	
 }

@@ -3,6 +3,7 @@ package velocitekProStartAnalyzer;
 public class PointDto {
 	private int pointID;
 	private String pointDate;
+	private String pointDateMMDDYY;
 	private double pointHeading;
 	private double pointSpeed;
 	private double pointLatidude;
@@ -49,6 +50,12 @@ public class PointDto {
 		return "Point [pointID=" + pointID + ", pointDate=" + pointDate + ", pointHeading=" + pointHeading
 				+ ", pointSpeed=" + pointSpeed + ", pointLatidude=" + pointLatidude + ", pointLongtidude="
 				+ pointLongtidude + "]";
+	}
+	public String getPointDateMMDDYY() {
+		return pointDateMMDDYY;
+	}
+	public void setPointDateMMDDYY(String pointDateMMDDYY) {
+		this.pointDateMMDDYY = pointDateMMDDYY;
 	}
 	
 	

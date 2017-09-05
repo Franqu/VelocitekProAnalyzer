@@ -79,10 +79,12 @@ public class JDBCPointDao implements PointDao {
                 	PointDto pointDto = new PointDto();
                     pointDto.setPointID(Integer.parseInt(resultSet.getString("idpoint_data")));
                     pointDto.setPointDate(resultSet.getString("point_date").substring(11, resultSet.getString("point_date").length() - 6));
+                    pointDto.setPointDateMMDDYY(resultSet.getString("point_date").substring(0,resultSet.getString("point_date").length() - 15));
                     pointDto.setPointHeading(resultSet.getDouble("point_heading"));
                     pointDto.setPointSpeed(resultSet.getDouble("point_speed"));
                     pointDto.setPointLatidude(resultSet.getDouble("point_latitude"));
                     pointDto.setPointLongtidude(resultSet.getDouble("point_longitude"));
+                    
                     speedTimeSeries.add(pointDto.getPointID(),pointDto.getPointSpeed());
                    // dataSet.addValue((Number)  pointDto.getPointSpeed(),"Point ID" ,pointDto.getPointDate());
                    

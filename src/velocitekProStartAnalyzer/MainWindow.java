@@ -60,7 +60,7 @@ public class MainWindow {
 	private JFrame frame;
 	private JButton btnLoadRouteData;
 	private JButton btnSaveAsVCC;
-	JButton btnShowFileDialogButton = new JButton("Open File");
+	private JButton btnShowFileDialogButton = new JButton("Open File");
 	//private JDBCPointDao jdbcPointDao; 
 	static JTable pointTable = new JTable();
 	private JPanel btnPanel;
@@ -72,11 +72,13 @@ public class MainWindow {
 	static JLabel dataAnalysisLabel = new JLabel();
 	private JLabel statusLabel = new JLabel();
 	private JPanel graphPanel = new JPanel(new BorderLayout());
-	private JMenuItem btnDeleteSelected;
-	private JMenuItem btnSetStartTime;
+	private JMenuItem btnDeleteSelected = new JMenuItem();
+	private JMenuItem btnSetStartTime = new JMenuItem();
 	private String filePath;
-	private JMenuItem btnDeleteAllButNotSelected;
-	private JMenuItem btnSetStartFinishMapMarkers;
+	private JMenuItem btnDeleteAllButNotSelected = new JMenuItem();
+	private JMenuItem btnSetStartFinishMapMarkers = new JMenuItem();
+	private JMenuItem btnSaveMapAsPng = new JMenuItem();
+	private JMenuItem btnSaveTableAsPng = new JMenuItem();
 	private static MapPanel mapPanel = new MapPanel();
 	private Crosshair xCrosshair;
     private Crosshair yCrosshair;
@@ -86,6 +88,7 @@ public class MainWindow {
 	private final Color colorMapMarkerHover = new Color (0x808080);
 	private final Color colorMapMarkerCircle = new Color (0x000000);
 	private DataAnalysis dataAnalysis = new DataAnalysis();
+	final JFileChooser fileChooser = new JFileChooser();
 	public static MapPanel getMapPanel() {
 		return mapPanel;
 	}
@@ -263,12 +266,6 @@ public class MainWindow {
 		btnSaveAsVCC = new JButton("Save as VCC");
 		btnPanel.add(btnSaveAsVCC);
 		if(JDBCPointDao.points.isEmpty()){btnSaveAsVCC.setEnabled(false);}
-		btnSaveAsVCC.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				saveNewVCC();
-			}
-		});
-	
 		
 		
 						
@@ -297,7 +294,8 @@ public class MainWindow {
 		btnPanel.add(statusLabel);
 		statusLabel.setVisible(true);
 		//frame.add(statusLabel);
-		showFileChooser();
+		
+		openFile();
 		loadDataFromDB();
 		
 		pointTable.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
@@ -376,33 +374,13 @@ public class MainWindow {
 			}
 		});
 		
-		btnSetStartTime = new JMenuItem("Save Map as PNG");
-		popup.add(btnSetStartTime);
-		btnSetStartTime.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					saveMapAsPng(mapPanel);
-					statusLabel.setText("Map Screenshot Saved");
-				} catch (NullPointerException exception) {
-					return;
-				}
-				
-			}
-		});
+		btnSaveMapAsPng = new JMenuItem("Save Map as PNG");
+		popup.add(btnSaveMapAsPng);
+		
 		
 		btnSetStartTime = new JMenuItem("Save Table as PNG");
 		popup.add(btnSetStartTime);
-		btnSetStartTime.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					saveTableAsPng(tableContainer);
-					statusLabel.setText("Table Screenshot Saved");
-				} catch (NullPointerException exception) {
-					return;
-				}
-				
-			}
-		});
+		
 		
 		JMenuItem btnResizeWindow = new JMenuItem("Resize Windows");
 		popup.add(btnResizeWindow);
@@ -425,7 +403,9 @@ public class MainWindow {
 	    tableContainer.addMouseListener(popupListener);
 	    pointTable.addMouseListener(popupListener);
 		mapPanel.addMouseListener(popupListener);    
-	
+		saveMapAsPng(mapPanel);
+		saveTableAsPng(tableContainer);
+		saveNewVCC();
 		
 		
 	}
@@ -451,70 +431,126 @@ public class MainWindow {
 	}
 	
 	private void saveMapAsPng(JPanel panel){
-		 BufferedImage bufImage = new BufferedImage(panel.getSize().width, panel.getSize().height,BufferedImage.TYPE_INT_RGB);
-	       panel.paint(bufImage.createGraphics());
-	       //DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-	      // Date date = new Date();
+		
+	      
 	       
-	       //File imageFile = new File("."+File.separator+"\\MapScreenshot "+dateFormat.format(date)+".png" );
-	       
-	       final JFileChooser fileChooser = new JFileChooser();
-	       fileChooser.setDialogTitle("Specify a file to save");   
 	        
-	       int userSelection = fileChooser.showSaveDialog(frame);
-	        
-	       if (userSelection == JFileChooser.APPROVE_OPTION) {
-	           File fileToSave = new File(fileChooser.getSelectedFile()+".png");
-	           System.out.println("Save as file: " + fileToSave.getAbsolutePath());
-	           try{
-	   	    	fileToSave.createNewFile();
-	   	        ImageIO.write(bufImage, "png", fileToSave);
-	   	    }catch(Exception ex){
-	   	    }
-	       }
+	       btnSaveMapAsPng.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				fileChooser.setDialogTitle("Specify a file to save");   
+				 int userSelection = fileChooser.showSaveDialog(frame);
+				 BufferedImage bufImage = new BufferedImage(panel.getSize().width, panel.getSize().height,BufferedImage.TYPE_INT_RGB);
+			       panel.paint(bufImage.createGraphics());
+			       if (userSelection == JFileChooser.APPROVE_OPTION) {
+			           File fileToSave = new File(fileChooser.getSelectedFile()+".png");
+			           System.out.println("Save as file: " + fileToSave.getAbsolutePath());
+			           try{
+			   	    	fileToSave.createNewFile();
+			   	        ImageIO.write(bufImage, "png", fileToSave);
+			   	        statusLabel.setText("Map Screenshot Saved as: "+ fileToSave.getName());
+			   	    }catch(Exception ex){
+			   	    	statusLabel.setText("There was an error during save, aborted");
+			   	    }
+			           
+			       }
+			}
+		});
+	      
 	       
 	      // File imageFile = new File("C:\\MJ_NETCLINIC\\asd.png");
 	   
 	}
 	
 	private void saveNewVCC(){
-			final JFileChooser fileChooser = new JFileChooser();
-			fileChooser.setDialogTitle("Specify a file to save");   
+			
+			
 	        SaveXMLFile saveXMLFile = new SaveXMLFile();
-	       int userSelection = fileChooser.showSaveDialog(frame);
+	        btnSaveAsVCC.addActionListener(new ActionListener(){
+
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					fileChooser.setDialogTitle("Specify a file to save");   
+					 int userSelection = fileChooser.showSaveDialog(frame);
+				        
+				       if (userSelection == JFileChooser.APPROVE_OPTION) {
+				           File fileToSave = new File(fileChooser.getSelectedFile()+".vcc");
+				           System.out.println("Save as file: " + fileToSave.getAbsolutePath());
+				           try{
+				   	    	fileToSave.createNewFile();
+				   	    	saveXMLFile.saveToVCC(fileToSave.getAbsolutePath());
+				   	    	statusLabel.setText("Saved data as: " + fileToSave.getName() );
+				   	    }catch(Exception ex){
+				   	    	statusLabel.setText("There was an error during save, aborted");
+				   	    }
+				           
+				       }
+					
+				}
+	        	
+	        });
 	        
-	       if (userSelection == JFileChooser.APPROVE_OPTION) {
-	           File fileToSave = new File(fileChooser.getSelectedFile()+".vcc");
-	           System.out.println("Save as file: " + fileToSave.getAbsolutePath());
-	           try{
-	   	    	fileToSave.createNewFile();
-	   	    	saveXMLFile.saveToVCC(fileToSave.getAbsolutePath());
-	   	    }catch(Exception ex){
-	   	    }
-	       }
+	      
+	}
+	
+	private void openFile(){		   
+		 
+			
+		   ReadXMLFile readXmlFile = new ReadXMLFile();
+		   btnShowFileDialogButton.addActionListener(new ActionListener() {
+		      @Override
+		      public void actionPerformed(ActionEvent e) {
+		    	  fileChooser.setDialogTitle("Specify a file to open");   
+		    	  statusLabel.setText("Loading file..." );
+		         int returnVal = fileChooser.showOpenDialog(frame);
+		         
+		         if (returnVal == JFileChooser.APPROVE_OPTION) {
+		            java.io.File file = fileChooser.getSelectedFile();
+		            if(file.getPath().substring(file.getPath().length() - 4).equals(".vcc"))
+		            {
+		            	setFilePath(file.getPath());
+		            readXmlFile.ReadXmlFile(getFilePath());
+		            loadDataFromDB();
+		            setStartFinishMapMarkers();
+		            statusLabel.setText("File Loaded: " + file.getName());
+		            }
+		            else
+		            {
+		            	statusLabel.setText("Please select a .vcc file");
+		            }
+		         } else {
+		            statusLabel.setText("Open command cancelled by user." );           
+		         }      
+		      }
+		   });
 	}
 	
 	private void saveTableAsPng(JScrollPane panel){
-		 BufferedImage bufImage = new BufferedImage(panel.getSize().width, panel.getSize().height,BufferedImage.TYPE_INT_RGB);
-	       panel.paint(bufImage.createGraphics());
-	       ///DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-	       ///Date date = new Date();
+	       btnSaveTableAsPng.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				fileChooser.setDialogTitle("Specify a file to save");   
+				int userSelection = fileChooser.showSaveDialog(frame);
+				BufferedImage bufImage = new BufferedImage(panel.getSize().width, panel.getSize().height,BufferedImage.TYPE_INT_RGB);
+				panel.paint(bufImage.createGraphics());
+			       
+			       if (userSelection == JFileChooser.APPROVE_OPTION) {
+			           File fileToSave = new File(fileChooser.getSelectedFile()+".png");
+			           System.out.println("Save as file: " + fileToSave.getAbsolutePath());
+			           try{
+			   	    	fileToSave.createNewFile();
+			   	        ImageIO.write(bufImage, "png", fileToSave);
+			   	        statusLabel.setText("Table Screenshot Saved as:"+ fileToSave.getName() );
+			   	    }catch(Exception ex){
+			   	    	statusLabel.setText("There was an error during save, aborted");
+			   	    }
+			          
+			       }
+			}
+		});
 	       
-	     ///  File imageFile = new File("."+File.separator+"\\TableScreenshot "+dateFormat.format(date)+".png" );
-	       final JFileChooser fileChooser = new JFileChooser();
-	       fileChooser.setDialogTitle("Specify a file to save");   
-	        
-	       int userSelection = fileChooser.showSaveDialog(frame);
-	        
-	       if (userSelection == JFileChooser.APPROVE_OPTION) {
-	           File fileToSave = new File(fileChooser.getSelectedFile()+".png");
-	           System.out.println("Save as file: " + fileToSave.getAbsolutePath());
-	           try{
-	   	    	fileToSave.createNewFile();
-	   	        ImageIO.write(bufImage, "png", fileToSave);
-	   	    }catch(Exception ex){
-	   	    }
-	       }
 	}
 	
 	
@@ -830,39 +866,7 @@ public class MainWindow {
 	
 	
 	
-	private void showFileChooser(){
-   
-	   final JFileChooser  fileDialog = new JFileChooser();
-	   
-	   ReadXMLFile readXmlFile = new ReadXMLFile();
-	   btnShowFileDialogButton.addActionListener(new ActionListener() {
-	      @Override
-	      public void actionPerformed(ActionEvent e) {
-	    	  statusLabel.setText("Loading file..." );
-	         int returnVal = fileDialog.showOpenDialog(frame);
-	         
-	         if (returnVal == JFileChooser.APPROVE_OPTION) {
-	            java.io.File file = fileDialog.getSelectedFile();
-	            if(file.getPath().substring(file.getPath().length() - 4).equals(".vcc"))
-	            {
-	            	setFilePath(file.getPath());
-	            readXmlFile.ReadXmlFile(getFilePath());
-	            loadDataFromDB();
-	            setStartFinishMapMarkers();
-	            statusLabel.setText("File Loaded: " + file.getName());
-	            }
-	            else
-	            {
-	            	statusLabel.setText("Please select a .vcc file");
-	            }
-	         } else {
-	            statusLabel.setText("Open command cancelled by user." );           
-	         }      
-	      }
-	   });
-  // btnPanel.add(showFileDialogButton);
-     
-}
+	
 	private String showSetStartTimeDialog(){
 				Object[] hoursInPoints = {};
 

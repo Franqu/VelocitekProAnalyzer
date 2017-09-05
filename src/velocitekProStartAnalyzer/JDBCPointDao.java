@@ -18,9 +18,10 @@ public class JDBCPointDao implements PointDao {
 	
 	 static List<Coordinate> mapPointsListCoords = new ArrayList<Coordinate>();
 	 static List<PointDto> points = new ArrayList<>();
+	 static List<PointDto> pointsOld = new ArrayList<>();
      Connection connection = null;
-    final  XYSeriesCollection dataSet = new XYSeriesCollection();
-    XYSeries speedTimeSeries = new XYSeries("Point, Speed");
+    static  XYSeriesCollection dataSet = new XYSeriesCollection();
+    static XYSeries speedTimeSeries = new XYSeries("Point, Speed");
     XYSeries timeSeries = new XYSeries("Time");
     public Connection getConnection(String fileName){
         try {
@@ -131,7 +132,7 @@ public class JDBCPointDao implements PointDao {
 	    		connection.setAutoCommit(false);
 	    		
 	    		PreparedStatement stmt=connection.prepareStatement("INSERT INTO point_data (point_date, point_heading, point_speed, point_latitude, point_longitude) VALUES (?,?,?,?,?);");
-	    		stmt.setString(1, pointDto.getPointDateHHmmss());
+	    		stmt.setString(1, pointDto.getPointDate());
 	    		stmt.setDouble(2, pointDto.getPointHeading());
 	    		stmt.setDouble(3, pointDto.getPointSpeed());
 	    		stmt.setDouble(4, pointDto.getPointLatidude());

@@ -47,6 +47,8 @@ import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.event.PlotChangeEvent;
+import org.jfree.chart.event.PlotChangeListener;
 import org.jfree.chart.panel.CrosshairOverlay;
 import org.jfree.chart.plot.Crosshair;
 import org.jfree.chart.plot.PlotOrientation;
@@ -79,6 +81,8 @@ public class MainWindow {
 	private JMenuItem btnSetStartFinishMapMarkers = new JMenuItem();
 	private JMenuItem btnSaveMapAsPng = new JMenuItem();
 	private JMenuItem btnSaveTableAsPng = new JMenuItem();
+	private JMenuItem btnBackData = new JMenuItem();
+	private JMenuItem btnAvgSpeedChart = new JMenuItem("Get Average Speed Data");
 	private static MapPanel mapPanel = new MapPanel();
 	private Crosshair xCrosshair;
     private Crosshair yCrosshair;
@@ -102,6 +106,7 @@ public class MainWindow {
 	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					MainWindow window = new MainWindow();
@@ -112,6 +117,7 @@ public class MainWindow {
 			}
 		});
 		EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				setStartFinishMapMarkers();
 				}
@@ -175,8 +181,8 @@ public class MainWindow {
 			   Vector<Object> vector = new Vector<Object>();
 		        for (int columnIndex = 0 ; columnIndex < columnNames.size(); columnIndex++) {
 		        		
-		        	  vector.add((int) 	point.getPointID());
-		        	  vector.add((String) point.getPointDateHHmmss());
+		        	  vector.add(point.getPointID());
+		        	  vector.add(point.getPointDateHHmmss());
 		        	  vector.add(Math.round(Double.valueOf(dfHeading.format(point.getPointHeading()))));
 		        	  vector.add(Double.valueOf(dfSpeed.format(point.getPointSpeed())));
 		        	  vector.add(Double.valueOf(dfGeo.format(point.getPointLatidude())));
@@ -209,6 +215,7 @@ public class MainWindow {
             false                      // urls
         );
         chart.getPlot().setBackgroundPaint( Color.WHITE );
+        
         return chart;
 	}
 	private void initialize() {
@@ -228,7 +235,8 @@ public class MainWindow {
 		frame.getContentPane().add(btnPanel, BorderLayout.NORTH);
 		
 		frame.addWindowStateListener(new WindowStateListener() {
-	        public void windowStateChanged(WindowEvent event) {
+	        @Override
+			public void windowStateChanged(WindowEvent event) {
 	            boolean isMaximized = isMaximized(event.getNewState());
 	            boolean wasMaximized = isMaximized(event.getOldState());
 
@@ -257,6 +265,7 @@ public class MainWindow {
 		btnPanel.add(btnLoadRouteData);
 		if(getFilePath() == null){btnLoadRouteData.setEnabled(false);}
 		btnLoadRouteData.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				readXmlFile.ReadXmlFile(getFilePath());
 				loadDataFromDB();
@@ -299,7 +308,8 @@ public class MainWindow {
 		loadDataFromDB();
 		
 		pointTable.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
-	        public void valueChanged(ListSelectionEvent event) {
+	        @Override
+			public void valueChanged(ListSelectionEvent event) {
 	        	if(!JDBCPointDao.points.isEmpty()){
 	        		getMapPanel().map().removeAllMapMarkers();
 		        	for (int pointTableID : pointTable.getSelectedRows()) {
@@ -333,7 +343,9 @@ public class MainWindow {
 	    btnDeleteSelected = new JMenuItem("Delete Selected");
 		popup.add(btnDeleteSelected);
 		btnDeleteSelected.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
+				
 				deleteSelected();
 				loadDataFromDB();
 			}
@@ -342,7 +354,9 @@ public class MainWindow {
 		btnDeleteAllButNotSelected = new JMenuItem("Set Selected as New Database");
 		popup.add(btnDeleteAllButNotSelected);
 		btnDeleteAllButNotSelected.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
+				
 				deleteAllButNotSelected();
 				loadDataFromDB();
 				setStartFinishMapMarkers();
@@ -352,8 +366,11 @@ public class MainWindow {
 		btnSetStartTime = new JMenuItem("Set Race Time");
 		popup.add(btnSetStartTime);
 		btnSetStartTime.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
+					JDBCPointDao.pointsOld.clear();
+					JDBCPointDao.pointsOld.addAll(JDBCPointDao.points);
 					setStartTime(showSetStartTimeDialog());
 					loadDataFromDB();
 					setEndTime(showSetEndTimeDialog());
@@ -369,6 +386,7 @@ public class MainWindow {
 		btnSetStartFinishMapMarkers = new JMenuItem("Show Start Finish");
 		popup.add(btnSetStartFinishMapMarkers);
 		btnSetStartFinishMapMarkers.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				setStartFinishMapMarkers();				
 			}
@@ -378,13 +396,17 @@ public class MainWindow {
 		popup.add(btnSaveMapAsPng);
 		
 		
-		btnSetStartTime = new JMenuItem("Save Table as PNG");
-		popup.add(btnSetStartTime);
+		btnSaveTableAsPng = new JMenuItem("Save Table as PNG");
+		popup.add(btnSaveTableAsPng);
+		btnBackData = new JMenuItem("Back");
+		popup.add(btnBackData);
+		if(JDBCPointDao.pointsOld.isEmpty()){btnBackData.setEnabled(false);}
 		
 		
 		JMenuItem btnResizeWindow = new JMenuItem("Resize Windows");
 		popup.add(btnResizeWindow);
 		btnResizeWindow.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
 					defaultSize();
@@ -406,6 +428,8 @@ public class MainWindow {
 		saveMapAsPng(mapPanel);
 		saveTableAsPng(tableContainer);
 		saveNewVCC();
+		backData();
+		
 		
 		
 	}
@@ -425,7 +449,6 @@ public class MainWindow {
 				getMapPanel().map().addMapMarker(mapPointFinish);
 			}
 			mapPanel.map().setDisplayToFitMapPolygons();
-	       
 		}
 	
 	}
@@ -453,7 +476,6 @@ public class MainWindow {
 			   	    }catch(Exception ex){
 			   	    	statusLabel.setText("There was an error during save, aborted");
 			   	    }
-			           
 			       }
 			}
 		});
@@ -464,8 +486,6 @@ public class MainWindow {
 	}
 	
 	private void saveNewVCC(){
-			
-			
 	        SaveXMLFile saveXMLFile = new SaveXMLFile();
 	        btnSaveAsVCC.addActionListener(new ActionListener(){
 
@@ -484,14 +504,9 @@ public class MainWindow {
 				   	    }catch(Exception ex){
 				   	    	statusLabel.setText("There was an error during save, aborted");
 				   	    }
-				           
 				       }
-					
 				}
-	        	
 	        });
-	        
-	      
 	}
 	
 	private void openFile(){		   
@@ -542,9 +557,9 @@ public class MainWindow {
 			           try{
 			   	    	fileToSave.createNewFile();
 			   	        ImageIO.write(bufImage, "png", fileToSave);
-			   	        statusLabel.setText("Table Screenshot Saved as:"+ fileToSave.getName() );
+			   	        statusLabel.setText("Table Screenshot Saved as: "+ fileToSave.getName() );
 			   	    }catch(Exception ex){
-			   	    	statusLabel.setText("There was an error during save, aborted");
+			   	    	statusLabel.setText("There was an error during saving");
 			   	    }
 			          
 			       }
@@ -570,13 +585,34 @@ public class MainWindow {
 		MapPolyline routePolyline = new MapPolyline(JDBCPointDao.mapPointsListCoords);
 		mapPanel.map().addMapPolygon(routePolyline);
 		mapPanel.revalidate();
-		XYSeriesCollection dataset = jdbcPointDao.dataSet;
+		XYSeriesCollection dataset = JDBCPointDao.dataSet;
 	    JFreeChart chart = createChart(dataset);
 	    ChartPanel chartPanel = new ChartPanel(chart);
 	    chartPanel.setMinimumDrawWidth( 0 );
 	    chartPanel.setMinimumDrawHeight( 0 );
 	    chartPanel.setMaximumDrawWidth( 1920 );
-	    chartPanel.setMaximumDrawHeight( 1200 ); 
+	    chartPanel.setMaximumDrawHeight( 1200 );
+	    chartPanel.getPopupMenu().add(btnAvgSpeedChart);
+	    btnAvgSpeedChart.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				int iterator = 1;
+				JDBCPointDao.dataSet.removeAllSeries();
+				JDBCPointDao.speedTimeSeries.clear();
+				for (Double avgSpeed : dataAnalysis.getAvgSpeedForChart()) {					
+					JDBCPointDao.speedTimeSeries.add(iterator,avgSpeed);
+					iterator++;
+				}
+				JDBCPointDao.dataSet.addSeries(JDBCPointDao.speedTimeSeries);
+				
+				chartPanel.add(chartPanel);
+				
+				chartPanel.revalidate();
+				
+			}
+		});
 	    chartPanel.addChartMouseListener(new ChartMouseListener(){
 
 			@Override
@@ -663,7 +699,7 @@ public class MainWindow {
 		            	x = Math.round(x);
 	            	if(cord.getPointID() == x){
 	            		mapPanel.map().removeMapMarker(mapPanel.getMapPoint());
-		            	mapPanel.setMapPoint(new MapMarkerDot(null,  null, (double) cord.getPointLatidude(),(double) cord.getPointLongtidude()));             
+		            	mapPanel.setMapPoint(new MapMarkerDot(null,  null, cord.getPointLatidude(),cord.getPointLongtidude()));             
 		            	mapPanel.setMapPoint(mapPanel.getMapPoint());
 		            	mapPanel.getMapPoint().setColor(colorMapMarkerCircle);
 		            	mapPanel.getMapPoint().setBackColor(colorMapMarkerHover);
@@ -708,8 +744,9 @@ public class MainWindow {
 	    else{btnSaveAsVCC.setEnabled(true);}
 	    if(getFilePath() != null){btnLoadRouteData.setEnabled(true);}
 	    else{btnLoadRouteData.setEnabled(false);}
-	    
-	    if(!JDBCPointDao.points.isEmpty())
+	    if(JDBCPointDao.pointsOld.isEmpty()){btnBackData.setEnabled(false);}
+	    else{btnBackData.setEnabled(true);}
+	    if(!JDBCPointDao.points.isEmpty() )
 	    {
 	    	 dataAnalysisLabel.setText(
 	 	    		" Min Speed: "+dataAnalysis.getMinSpeed()+
@@ -718,27 +755,42 @@ public class MainWindow {
 	 	    		" Median Speed: "+dataAnalysis.getMedianSpeed()+
 	 	    		" Time Elapsed: "+dataAnalysis.elapsedRaceTime(JDBCPointDao.points.get(0).getPointDateMMDDYY()+" "+JDBCPointDao.points.get(0).getPointDateHHmmss(),
 	 	    				JDBCPointDao.points.get(JDBCPointDao.points.size()-1).getPointDateMMDDYY()+" "+JDBCPointDao.points.get(JDBCPointDao.points.size()-1).getPointDateHHmmss()) +
-	 	    		" Date: "+JDBCPointDao.points.get(1).getPointDateMMDDYY()
+	 	    		" Date: "+JDBCPointDao.points.get(0).getPointDateMMDDYY()
 	 	    		);
 	    }
 	   
 	    
 
 }
-	
+	private void refreshChart(XYSeriesCollection dataset){
+		JFreeChart chart = createChart(dataset);
+	    ChartPanel chartPanel = new ChartPanel(chart);
+	    chartPanel.setMinimumDrawWidth( 0 );
+	    chartPanel.setMinimumDrawHeight( 0 );
+	    chartPanel.setMaximumDrawWidth( 1920 );
+	    chartPanel.setMaximumDrawHeight( 1200 );
+	    chartPanel.getPopupMenu().add(btnAvgSpeedChart);
+	}
 	private void deleteSelected(){
 		JDBCPointDao jdbcPointDao = new JDBCPointDao();
 		jdbcPointDao.getConnection(dbName);
+	
 		try {
 			jdbcPointDao.connection.setAutoCommit(false);
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
+		Boolean flag = false;
 		for (int selectedRowID : pointTable.getSelectedRows()) {
 			int id =  (int) pointTable.getModel().getValueAt(selectedRowID, 0);
 			jdbcPointDao.deleteSelected(id);
+			flag = true;
 		}
 		try {
+			if(flag = true) {
+				JDBCPointDao.pointsOld.clear();
+				JDBCPointDao.pointsOld.addAll(JDBCPointDao.points);
+			}
 			jdbcPointDao.connection.commit();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -747,10 +799,12 @@ public class MainWindow {
 	}
 	
 	private void deleteAllButNotSelected(){
+		
 		if(pointTable.getSelectedRowCount() != 0){
 			
 			JDBCPointDao jdbcPointDao = new JDBCPointDao();
 			jdbcPointDao.getConnection(dbName);
+			Boolean flag = false;
 			try {
 				jdbcPointDao.connection.setAutoCommit(false);
 			} catch (SQLException e1) {
@@ -765,10 +819,16 @@ public class MainWindow {
 			for (PointDto pointDto : JDBCPointDao.points) {
 				if(!selectedIdList.contains(pointDto.getPointID())){
 					jdbcPointDao.deleteSelected(pointDto.getPointID());
+					flag = true;
+					
 				}
 			}
 			try {
-				
+				if(flag = true) {
+					
+					JDBCPointDao.pointsOld.clear();
+					JDBCPointDao.pointsOld.addAll(JDBCPointDao.points);
+				}
 				jdbcPointDao.connection.commit();
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -780,6 +840,7 @@ public class MainWindow {
 	
 	private void setStartTime(String startTime){
 		Boolean flagTimeIsInPoints = false;
+		Boolean flag = false;
 		if(startTime.equals(null))
 		{
 			return;
@@ -806,12 +867,17 @@ public class MainWindow {
 			for (PointDto pointDto : JDBCPointDao.points) {
 				String time = pointDto.getPointDateHHmmss();
 				time = time.substring(0,time.length()-3);
-				jdbcPointDao.deleteSelected(pointDto.getPointID());	
+				jdbcPointDao.deleteSelected(pointDto.getPointID());
+				flag=true;
 				if(time.equals(startTime)){
 					break;
 				}
 			}
 			try {
+				if(flag = true) {
+					JDBCPointDao.pointsOld.clear();
+					JDBCPointDao.pointsOld.addAll(JDBCPointDao.points);
+				}
 				jdbcPointDao.connection.commit();
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -823,6 +889,8 @@ public class MainWindow {
 	private void setEndTime(String endTime){
 		Boolean flagTimeIsInPoints = false;
 		Boolean startDeleting = false;
+		
+
 		if(endTime.equals(null))
 		{
 			return;
@@ -920,6 +988,31 @@ public class MainWindow {
 		return s;
 
 }
+	
+	private void backData(){
+		btnBackData.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				JDBCPointDao jdbcPointDao = new JDBCPointDao();
+				jdbcPointDao.getConnection(MainWindow.dbName);
+				jdbcPointDao.deleteVacuum();
+				for (PointDto pointDto : JDBCPointDao.pointsOld) {
+	    			jdbcPointDao.insert(pointDto);
+					}
+				try {
+					jdbcPointDao.connection.commit();
+				} catch (SQLException e1) {
+					statusLabel.setText("There was an error during backing, aborted");
+					e1.printStackTrace();
+				}
+				JDBCPointDao.points.clear();
+				JDBCPointDao.points.addAll(JDBCPointDao.pointsOld);
+				JDBCPointDao.pointsOld = new ArrayList<>();
+				loadDataFromDB();
+			}
+		});
+	}
 	
 	 private Object[] appendValue(Object[] obj, Object newObj) {
 

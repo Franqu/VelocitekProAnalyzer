@@ -16,6 +16,8 @@ public class DataAnalysis {
 	private Double maxSpeed;
 	private Double avgSpeed;
 	private Double medianSpeed;
+	private List <Double> avgSpeedForChart;
+	private Double medianSpeedForChart;
 	
 	
 	public String elapsedRaceTime(String startDateString, String endDateString){
@@ -131,6 +133,53 @@ public class DataAnalysis {
 
 	public void setMedianSpeed(Double medianSpeed) {
 		this.medianSpeed = medianSpeed;
+	}
+
+	public List<Double> getAvgSpeedForChart() {
+		List <Double> pointsForChart = new ArrayList<>();
+		Boolean firstIndexFlag = true;
+		int iterator = 0;
+		double point = JDBCPointDao.points.get(0).getPointSpeed();
+		while(iterator != JDBCPointDao.points.size()){
+			for (int i = 0; i < 3; i++) {
+				
+				if(!firstIndexFlag == true){
+				 point = point + JDBCPointDao.points.get(i+iterator).getPointSpeed();
+				}
+				else{
+					firstIndexFlag = false;
+					}
+				if(i==2){
+					point = point / 3;
+					iterator= iterator + 3;
+					pointsForChart.add(point);
+				}
+				
+				}
+			if(iterator +3 == JDBCPointDao.points.size()){
+				break;
+			}
+			if(iterator +2 == JDBCPointDao.points.size()){
+				break;
+			}
+			if(iterator +1 == JDBCPointDao.points.size()){
+				break;
+			}
+
+		}
+		return pointsForChart;
+	}
+
+	public void setAvgSpeedForChart(List<Double> avgSpeedForChart) {
+		this.avgSpeedForChart = avgSpeedForChart;
+	}
+
+	public Double getMedianSpeedForChart() {
+		return medianSpeedForChart;
+	}
+
+	public void setMedianSpeedForChart(Double medianSpeedForChart) {
+		this.medianSpeedForChart = medianSpeedForChart;
 	}
 	
 	

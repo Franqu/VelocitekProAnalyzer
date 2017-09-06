@@ -83,6 +83,8 @@ public class MainWindow {
 	private JMenuItem btnSaveTableAsPng = new JMenuItem();
 	private JMenuItem btnBackData = new JMenuItem();
 	private JMenuItem btnAvgSpeedChart = new JMenuItem("Get Average Speed Data");
+	private JMenuItem btnMedianSpeedChart = new JMenuItem("Get Median Speed Data");
+	private JMenuItem btnResetSpeedChart = new JMenuItem("Redraw");
 	private static MapPanel mapPanel = new MapPanel();
 	private Crosshair xCrosshair;
     private Crosshair yCrosshair;
@@ -418,6 +420,160 @@ public class MainWindow {
 			}
 		});
 		
+		btnResetSpeedChart.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				loadDataFromDB();				
+			}
+		});
+		btnMedianSpeedChart.addActionListener(new ActionListener() {
+			
+
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				exponentation++;
+				int iterator = 1;
+				JDBCPointDao.dataSet.removeAllSeries();
+				JDBCPointDao.speedTimeSeries.clear();
+				for (Double avgSpeed : dataAnalysis.getMedianForChar()) {					
+					JDBCPointDao.speedTimeSeries.add(iterator,avgSpeed);
+					iterator++;
+				}
+				JDBCPointDao.dataSet.addSeries(JDBCPointDao.speedTimeSeries);
+				
+				XYSeriesCollection dataset = JDBCPointDao.dataSet;
+			    JFreeChart chart = createChart(dataset);
+			    ChartPanel chartPanel = new ChartPanel(chart);
+			    chartPanel.setMinimumDrawWidth( 0 );
+			    chartPanel.setMinimumDrawHeight( 0 );
+			    chartPanel.setMaximumDrawWidth( 1920 );
+			    chartPanel.setMaximumDrawHeight( 1200 );
+			    chartPanel.getPopupMenu().add(btnAvgSpeedChart);
+			    chartPanel.getPopupMenu().add(btnMedianSpeedChart);
+			    chartPanel.getPopupMenu().add(btnResetSpeedChart);
+			    
+			    CrosshairOverlay crosshairOverlay = new CrosshairOverlay();
+		        xCrosshair = new Crosshair(Double.NaN, Color.GRAY, 
+		                new BasicStroke(0f));
+		        xCrosshair.setLabelVisible(true);
+		        yCrosshair = new Crosshair(Double.NaN, Color.GRAY, 
+		                new BasicStroke(0f));
+		    	yCrosshair.setLabelVisible(true);
+		        crosshairOverlay.addDomainCrosshair(xCrosshair);
+		        crosshairOverlay.addRangeCrosshair(yCrosshair);
+		        chartPanel.addOverlay(crosshairOverlay);
+			    graphPanel.removeAll();
+			    graphPanel.add(chartPanel, BorderLayout.CENTER);
+			    graphPanel.revalidate();
+			    graphPanel.repaint();
+			    graphMapSplitPanel.revalidate();
+			    
+			    chartPanel.addChartMouseListener(new ChartMouseListener(){
+
+					@Override
+					public void chartMouseClicked(ChartMouseEvent event) {  
+					Rectangle2D dataArea = chartPanel.getScreenDataArea();
+		            JFreeChart chart = event.getChart();
+		            XYPlot plot = (XYPlot) chart.getPlot();
+		            ValueAxis xAxis = plot.getDomainAxis();
+		            double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, 
+		                    RectangleEdge.BOTTOM);
+		            // make the crosshairs disappear if the mouse is out of range
+		            if (!xAxis.getRange().contains(x)) { 
+		                x = Double.NaN;                  
+		            }
+
+		            x = Math.round(x) * Math.pow(3, exponentation);
+		            
+		            if(SwingUtilities.isLeftMouseButton(event.getTrigger()) && event.getTrigger().isShiftDown()){            	
+		           	 for (PointDto cord : JDBCPointDao.points) {
+		            		{
+		     				if(cord.getPointID() == x)
+		     				{            	
+		            	if(pointTable.getSelectionModel() == null){
+							for (int i=0; i < pointTable.getModel().getRowCount(); i++) {
+								if(pointTable.getModel().getValueAt(i, 0).equals(cord.getPointID()))
+								{
+									pointTable.setRowSelectionInterval(i,i);
+								}
+							}    			
+						}
+						else{
+							for (int i=0; i < pointTable.getModel().getRowCount(); i++) {
+								if(pointTable.getModel().getValueAt(i, 0).equals(cord.getPointID()))
+								{
+									pointTable.addRowSelectionInterval(pointTable.getSelectedRow(),i);
+								}
+							}
+							} 
+						pointTable.scrollRectToVisible(pointTable.getCellRect(pointTable.getSelectedRow(), 0, true));
+		     				}
+		            		}
+		           	 }
+		            }            
+		            else{   
+			       	 for (PointDto cord : JDBCPointDao.points) {
+				       		{
+								if(cord.getPointID() == x)
+								{
+									if(pointTable.getSelectionModel() != null){
+										pointTable.getSelectionModel().clearSelection();
+									}
+									for (int i=0; i < pointTable.getModel().getRowCount(); i++) {
+										if(pointTable.getModel().getValueAt(i, 0).equals(cord.getPointID()))
+										{
+											pointTable.setRowSelectionInterval(i,i);
+										}
+									}    						
+									pointTable.scrollRectToVisible(pointTable.getCellRect(pointTable.getSelectedRow(), 0, true));
+									//MainWindow.pointTable.revalidate();    						
+								}   						
+				   			}  
+				            
+				            }
+		            }
+				}
+
+					@Override
+					public void chartMouseMoved(ChartMouseEvent event) {
+						
+				            Rectangle2D dataArea = chartPanel.getScreenDataArea();
+				            JFreeChart chart = event.getChart();
+				            XYPlot plot = (XYPlot) chart.getPlot();
+				            ValueAxis xAxis = plot.getDomainAxis();
+				            double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, 
+				                    RectangleEdge.BOTTOM);
+				            // make the crosshairs disappear if the mouse is out of range
+				            if (!xAxis.getRange().contains(x)) { 
+				                x = Double.NaN;                  
+				            }
+				            double y = DatasetUtilities.findYValue(plot.getDataset(), 0, x);
+				            xCrosshair.setValue(x);
+				            yCrosshair.setValue(y);	 
+				            x = Math.round(x) * Math.pow(3,exponentation);
+				            for (PointDto cord : JDBCPointDao.points) {
+				            	
+			            	if(cord.getPointID() == x){
+			            		mapPanel.map().removeMapMarker(mapPanel.getMapPoint());
+				            	mapPanel.setMapPoint(new MapMarkerDot(null,  null, cord.getPointLatidude(),cord.getPointLongtidude()));             
+				            	mapPanel.setMapPoint(mapPanel.getMapPoint());
+				            	mapPanel.getMapPoint().setColor(colorMapMarkerCircle);
+				            	mapPanel.getMapPoint().setBackColor(colorMapMarkerHover);
+				            	mapPanel.map().addMapMarker(mapPanel.getMapPoint());
+			            	}
+			            	
+				            }
+					}
+					
+					
+				});
+			}
+		});
+		
+		
+		
 		
 	    btnAvgSpeedChart.addActionListener(new ActionListener() {
 			
@@ -441,6 +597,8 @@ public class MainWindow {
 			    chartPanel.setMaximumDrawWidth( 1920 );
 			    chartPanel.setMaximumDrawHeight( 1200 );
 			    chartPanel.getPopupMenu().add(btnAvgSpeedChart);
+			    chartPanel.getPopupMenu().add(btnMedianSpeedChart);
+			    chartPanel.getPopupMenu().add(btnResetSpeedChart);
 			    
 			    CrosshairOverlay crosshairOverlay = new CrosshairOverlay();
 		        xCrosshair = new Crosshair(Double.NaN, Color.GRAY, 
@@ -737,6 +895,8 @@ public class MainWindow {
 	    chartPanel.setMaximumDrawWidth( 1920 );
 	    chartPanel.setMaximumDrawHeight( 1200 );
 	    chartPanel.getPopupMenu().add(btnAvgSpeedChart);
+	    chartPanel.getPopupMenu().add(btnMedianSpeedChart);
+	    chartPanel.getPopupMenu().add(btnResetSpeedChart);
 
 	    chartPanel.addChartMouseListener(new ChartMouseListener(){
 
@@ -890,7 +1050,6 @@ public class MainWindow {
 		    	dataAnalysis.getPointsForChartGlobal().add(iterator, pointDto.getPointSpeed());
 		    	iterator++;
 			}
-	    	System.out.println("finished");
 	    }
 	    
 	    
@@ -898,15 +1057,7 @@ public class MainWindow {
 	    
 
 }
-	private void refreshChart(XYSeriesCollection dataset){
-		JFreeChart chart = createChart(dataset);
-	    ChartPanel chartPanel = new ChartPanel(chart);
-	    chartPanel.setMinimumDrawWidth( 0 );
-	    chartPanel.setMinimumDrawHeight( 0 );
-	    chartPanel.setMaximumDrawWidth( 1920 );
-	    chartPanel.setMaximumDrawHeight( 1200 );
-	    chartPanel.getPopupMenu().add(btnAvgSpeedChart);
-	}
+	
 	private void deleteSelected(){
 		JDBCPointDao jdbcPointDao = new JDBCPointDao();
 		jdbcPointDao.getConnection(dbName);

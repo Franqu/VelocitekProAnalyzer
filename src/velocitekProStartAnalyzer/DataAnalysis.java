@@ -17,7 +17,7 @@ public class DataAnalysis {
 	private Double avgSpeed;
 	private Double medianSpeed;
 	private List <Double> avgSpeedForChart;
-	private Double medianSpeedForChart;
+	
 	private List <Double> pointsForChartGlobal = new ArrayList<>();
 	
 	public String elapsedRaceTime(String startDateString, String endDateString){
@@ -138,22 +138,21 @@ public class DataAnalysis {
 	public List<Double> getAvgSpeedForChart() {
 		List <Double> pointsForChart = new ArrayList<>();
 		
-		Boolean firstIndexFlag = true;
+		
 		int iterator = 0;
-		double point = getPointsForChartGlobal().get(0);
+		double point = 0d;
 		while(iterator != getPointsForChartGlobal().size()){
+			
 			for (int i = 0; i < 3; i++) {
 				
-				if(!firstIndexFlag == true){
+				
 				 point = point + getPointsForChartGlobal().get(i+iterator);
-				}
-				else{
-					firstIndexFlag = false;
-					}
+				
 				if(i==2){
 					point = point / 3;
 					iterator= iterator + 3;
 					pointsForChart.add(point);
+					point = 0d;
 				}
 				
 				}
@@ -172,19 +171,59 @@ public class DataAnalysis {
 		getPointsForChartGlobal().addAll(pointsForChart);
 		return pointsForChart;
 	}
+	
+	public List <Double> getMedianForChar(){
+		
+		List <Double> pointsForChart = new ArrayList<>();		
+		int iterator = 0;
+		double point = 0d;
+		while(iterator != getPointsForChartGlobal().size()){
+			List<Double> medianSortedList = new ArrayList<Double>();
+			
+			for (int i = 0; i < 3; i++) {
+				
+				
+				 point = point + getPointsForChartGlobal().get(i+iterator);
+				 medianSortedList.add(point);
+				if(i==2){
+					
+					Collections.sort(medianSortedList);
+					if (medianSortedList.size() % 2 == 0)
+					    point = (medianSortedList.get(medianSortedList.size()/2) + medianSortedList.get(medianSortedList.size()/2 - 1))/2;
+					else
+						point =  medianSortedList.get(medianSortedList.size()/2);
+					
+					point = point / 3;
+					iterator= iterator + 3;
+					pointsForChart.add(point);
+					point = 0d;
+					medianSortedList.clear();
+				}
+				
+				}
+			if(iterator +3 == getPointsForChartGlobal().size()){
+				break;
+			}
+			if(iterator +2 == getPointsForChartGlobal().size()){
+				break;
+			}
+			if(iterator +1 == getPointsForChartGlobal().size()){
+				break;
+			}
+
+		}
+		
+		
+		
+		getPointsForChartGlobal().clear();
+		getPointsForChartGlobal().addAll(pointsForChart);
+		return pointsForChart;
+	}
 
 	public void setAvgSpeedForChart(List<Double> avgSpeedForChart) {
 		this.avgSpeedForChart = avgSpeedForChart;
 	}
-
-	public Double getMedianSpeedForChart() {
-		return medianSpeedForChart;
-	}
-
-	public void setMedianSpeedForChart(Double medianSpeedForChart) {
-		this.medianSpeedForChart = medianSpeedForChart;
-	}
-
+	
 	public List <Double> getPointsForChartGlobal() {
 		return pointsForChartGlobal;
 	}

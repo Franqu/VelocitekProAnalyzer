@@ -93,6 +93,7 @@ public class MainWindow {
 	private final Color colorMapMarkerCircle = new Color (0x000000);
 	private DataAnalysis dataAnalysis = new DataAnalysis();
 	final JFileChooser fileChooser = new JFileChooser();
+	static Double exponentation = 0d;
 	public static MapPanel getMapPanel() {
 		return mapPanel;
 	}
@@ -422,7 +423,7 @@ public class MainWindow {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
+				exponentation++;
 				int iterator = 1;
 				JDBCPointDao.dataSet.removeAllSeries();
 				JDBCPointDao.speedTimeSeries.clear();
@@ -472,7 +473,7 @@ public class MainWindow {
 		                x = Double.NaN;                  
 		            }
 
-		            x = Math.round(x);
+		            x = Math.round(x) * Math.pow(3, exponentation);
 		            
 		            if(SwingUtilities.isLeftMouseButton(event.getTrigger()) && event.getTrigger().isShiftDown()){            	
 		           	 for (PointDto cord : JDBCPointDao.points) {
@@ -539,8 +540,9 @@ public class MainWindow {
 				            double y = DatasetUtilities.findYValue(plot.getDataset(), 0, x);
 				            xCrosshair.setValue(x);
 				            yCrosshair.setValue(y);	 
+				            x = Math.round(x) * Math.pow(3,exponentation);
 				            for (PointDto cord : JDBCPointDao.points) {
-				            	x = Math.round(x);
+				            	
 			            	if(cord.getPointID() == x){
 			            		mapPanel.map().removeMapMarker(mapPanel.getMapPoint());
 				            	mapPanel.setMapPoint(new MapMarkerDot(null,  null, cord.getPointLatidude(),cord.getPointLongtidude()));             
@@ -714,6 +716,7 @@ public class MainWindow {
 	
 	
 	private void loadDataFromDB(){
+		exponentation = 0d;
 		mapPanel.map().removeAllMapPolygons();
 		mapPanel.map().removeAllMapMarkers();
 		mapPanel.map().removeAllMapRectangles();
@@ -817,8 +820,9 @@ public class MainWindow {
 		            double y = DatasetUtilities.findYValue(plot.getDataset(), 0, x);
 		            xCrosshair.setValue(x);
 		            yCrosshair.setValue(y);	 
+		            x = Math.round(x);
 		            for (PointDto cord : JDBCPointDao.points) {
-		            	x = Math.round(x);
+		            	
 	            	if(cord.getPointID() == x){
 	            		mapPanel.map().removeMapMarker(mapPanel.getMapPoint());
 		            	mapPanel.setMapPoint(new MapMarkerDot(null,  null, cord.getPointLatidude(),cord.getPointLongtidude()));             
@@ -880,6 +884,16 @@ public class MainWindow {
 	 	    		" Date: "+JDBCPointDao.points.get(0).getPointDateMMDDYY()
 	 	    		);
 	    }
+	    if(!JDBCPointDao.points.isEmpty() ){
+	    	int iterator = 0;
+	    	for (PointDto pointDto : JDBCPointDao.points) {
+		    	dataAnalysis.getPointsForChartGlobal().add(iterator, pointDto.getPointSpeed());
+		    	iterator++;
+			}
+	    	System.out.println("finished");
+	    }
+	    
+	    
 	   
 	    
 

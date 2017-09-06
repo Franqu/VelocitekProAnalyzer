@@ -73,6 +73,7 @@ public class MainWindow {
 	static JSplitPane tableGraphMapSplitPanel;
 	static JLabel dataAnalysisLabel = new JLabel();
 	private JLabel statusLabel = new JLabel();
+	private JLabel copyrightLabel = new JLabel(" Velocitek Prostart Analyser v.1.2 - Copyright (C) 2017 Maciej Jêdrzejko");	
 	private JPanel graphPanel = new JPanel(new BorderLayout());
 	private JMenuItem btnDeleteSelected = new JMenuItem();
 	private JMenuItem btnSetStartTime = new JMenuItem();
@@ -82,6 +83,7 @@ public class MainWindow {
 	private JMenuItem btnSaveMapAsPng = new JMenuItem();
 	private JMenuItem btnSaveTableAsPng = new JMenuItem();
 	private JMenuItem btnBackData = new JMenuItem();
+	private JMenuItem btnAbout = new JMenuItem("About");
 	private JMenuItem btnAvgSpeedChart = new JMenuItem("Get Average Speed Data");
 	private JMenuItem btnMedianSpeedChart = new JMenuItem("Get Median Speed Data");
 	private JMenuItem btnResetSpeedChart = new JMenuItem("Redraw");
@@ -233,7 +235,7 @@ public class MainWindow {
 		//frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
 		setScrollTable(new JScrollPane());
-		
+		frame.getContentPane().add(copyrightLabel, BorderLayout.PAGE_END);
 		btnPanel = new JPanel();
 		frame.getContentPane().add(btnPanel, BorderLayout.NORTH);
 		
@@ -403,6 +405,28 @@ public class MainWindow {
 		popup.add(btnSaveTableAsPng);
 		btnBackData = new JMenuItem("Back");
 		popup.add(btnBackData);
+		
+		popup.add(btnAbout);
+		btnAbout.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(
+						frame, "Velocitek Prostart Analyser v.1.2 - Copyright (C) 2017 Maciej Jêdrzejko"
+								+ "\n\nThis program is free software: you can redistribute it and/or modify"
+								+ "\nit under the terms of the GNU General Public License as published by "
+								+ "\nthe Free Software Foundation, either version 3 of the License, or"
+								+ "\n(at your option) any later version."
+								+ "\n\nThis program is distributed in the hope that it will be useful,"
+								+ "\nbut WITHOUT ANY WARRANTY; without even the implied warranty of"
+								+ "\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the"
+								+ "\nGNU General Public License for more details."
+								+ "\n\nYou should have received a copy of the GNU General Public License"
+								+ "\nalong with this program.  If not, see http://www.gnu.org/licenses/ "
+								);				
+			}
+		});
+		
 		if(JDBCPointDao.pointsOld.isEmpty()){btnBackData.setEnabled(false);}
 		
 		
@@ -1275,6 +1299,7 @@ public class MainWindow {
 		return s;
 
 }
+	
 	
 	private void backData(){
 		btnBackData.addActionListener(new ActionListener() {

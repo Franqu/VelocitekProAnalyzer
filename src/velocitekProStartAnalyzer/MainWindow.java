@@ -84,8 +84,8 @@ public class MainWindow {
 	private JMenuItem btnSaveTableAsPng = new JMenuItem();
 	private JMenuItem btnBackData = new JMenuItem();
 	private JMenuItem btnAbout = new JMenuItem("About");
-	private JMenuItem btnAvgSpeedChart = new JMenuItem("Get Average Speed Data");
-	private JMenuItem btnMedianSpeedChart = new JMenuItem("Get Median Speed Data");
+	private JMenuItem btnAvgSpeedChart = new JMenuItem("Average Speed Data");
+	private JMenuItem btnMedianSpeedChart = new JMenuItem("Median Speed Data");
 	private JMenuItem btnResetSpeedChart = new JMenuItem("Redraw");
 	private static MapPanel mapPanel = new MapPanel();
 	private Crosshair xCrosshair;

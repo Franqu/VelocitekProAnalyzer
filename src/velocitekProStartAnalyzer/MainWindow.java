@@ -406,7 +406,27 @@ public class MainWindow {
 		btnBackData = new JMenuItem("Back");
 		popup.add(btnBackData);
 		
+		
+		
+		
+		if(JDBCPointDao.pointsOld.isEmpty()){btnBackData.setEnabled(false);}
+		
+		
+		JMenuItem btnResizeWindow = new JMenuItem("Resize Windows");
+		popup.add(btnResizeWindow);
+		btnResizeWindow.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					defaultSize();
+				} catch (NullPointerException exception) {
+					return;
+				}
+				
+			}
+		});
 		popup.add(btnAbout);
+		
 		btnAbout.addActionListener(new ActionListener() {
 			
 			@Override
@@ -426,24 +446,6 @@ public class MainWindow {
 								);				
 			}
 		});
-		
-		if(JDBCPointDao.pointsOld.isEmpty()){btnBackData.setEnabled(false);}
-		
-		
-		JMenuItem btnResizeWindow = new JMenuItem("Resize Windows");
-		popup.add(btnResizeWindow);
-		btnResizeWindow.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					defaultSize();
-				} catch (NullPointerException exception) {
-					return;
-				}
-				
-			}
-		});
-		
 		btnResetSpeedChart.addActionListener(new ActionListener() {
 			
 			@Override

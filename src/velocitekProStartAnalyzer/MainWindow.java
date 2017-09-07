@@ -458,6 +458,8 @@ public class MainWindow {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				 int howManyTimes = selectHowManyTimes();
+					for (int i = 0; i < howManyTimes; i++) {
 				int iterator = 1;
 				JDBCPointDao.dataSet.removeAllSeries();
 				JDBCPointDao.speedTimeSeries.clear();
@@ -593,6 +595,7 @@ public class MainWindow {
 					
 					
 				});
+			}
 			}
 		});
 		

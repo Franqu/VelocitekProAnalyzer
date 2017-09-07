@@ -187,34 +187,44 @@ public class DataAnalysis {
 				{
 					point = point + getPointsForChartGlobal().get(i);
 					medianSortedList.add(point);
+					point = 0d;
 					point = point + getPointsForChartGlobal().get(i);
 					medianSortedList.add(point);
+					point = 0d;
 					point = point + getPointsForChartGlobal().get(i+1);
 					medianSortedList.add(point);
+					point = 0d;
 					
 				}
 				
 				else if(i == getPointsForChartGlobal().size() -1 ){
 					point = point + getPointsForChartGlobal().get(i-1);
 					medianSortedList.add(point);
+					point = 0d;
 					point = point + getPointsForChartGlobal().get(i);
 					medianSortedList.add(point);
+					point = 0d;
 					point = point + getPointsForChartGlobal().get(i);
 					medianSortedList.add(point);
+					point = 0d;
 				}
 				else{
 					point = point + getPointsForChartGlobal().get(i-1);
 					medianSortedList.add(point);
+					point = 0d;
 					point = point + getPointsForChartGlobal().get(i);
 					medianSortedList.add(point);
+					point = 0d;
 					point = point + getPointsForChartGlobal().get(i+1);
 					medianSortedList.add(point);
+					point = 0d;
 				}
 				Collections.sort(medianSortedList);
 				if (medianSortedList.size() % 2 == 0)
 				    point = (medianSortedList.get(medianSortedList.size()/2) + medianSortedList.get(medianSortedList.size()/2 - 1))/2;
 				else
-					point =  medianSortedList.get(medianSortedList.size()/2);			
+					point =  medianSortedList.get(medianSortedList.size()/2);
+				//point = point/2;
 				pointsForChart.add(point);
 				point = 0d;
 				medianSortedList.clear();

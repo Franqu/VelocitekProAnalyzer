@@ -463,8 +463,8 @@ public class MainWindow {
 				int iterator = 1;
 				JDBCPointDao.dataSet.removeAllSeries();
 				JDBCPointDao.speedTimeSeries.clear();
-				for (Double avgSpeed : dataAnalysis.getMedianForChar()) {					
-					JDBCPointDao.speedTimeSeries.add(iterator,avgSpeed);
+				for (Double medianSpeed : dataAnalysis.getMedianForChar()) {					
+					JDBCPointDao.speedTimeSeries.add(iterator,medianSpeed);
 					iterator++;
 				}
 				JDBCPointDao.dataSet.addSeries(JDBCPointDao.speedTimeSeries);

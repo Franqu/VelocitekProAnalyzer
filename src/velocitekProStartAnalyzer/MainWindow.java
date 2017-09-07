@@ -1310,7 +1310,7 @@ public class MainWindow {
 		Object[] valuesOfTimes = {1,2,3,4,5,6,7,8,9,10};
 		int number = (int)JOptionPane.showInputDialog(
 			    frame,
-			    "How many times execute the process?",
+			    "How many times do you want to execute the process?",
 			    "Set number of times",
 			    JOptionPane.PLAIN_MESSAGE,
 			    null,

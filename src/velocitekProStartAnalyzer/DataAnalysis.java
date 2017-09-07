@@ -16,7 +16,7 @@ public class DataAnalysis {
 	private Double maxSpeed;
 	private Double avgSpeed;
 	private Double medianSpeed;
-	private List <Double> avgSpeedForChart;
+	private List <Double> avgSpeedForChart = new ArrayList<>();
 	
 	private List <Double> pointsForChartGlobal = new ArrayList<>();
 	
@@ -141,79 +141,84 @@ public class DataAnalysis {
 		
 		int iterator = 0;
 		double point = 0d;
-		while(iterator != getPointsForChartGlobal().size()){
+		for(int i = 0; i< getPointsForChartGlobal().size() ; i++){
 			
-			for (int i = 0; i < 3; i++) {
-				
-				
-				 point = point + getPointsForChartGlobal().get(i+iterator);
-				
-				if(i==2){
-					point = point / 3;
-					iterator= iterator + 3;
-					pointsForChart.add(point);
-					point = 0d;
+				if(i == 0 )
+				{
+					point = point + getPointsForChartGlobal().get(i);
+					point = point + getPointsForChartGlobal().get(i);
+					point = point + getPointsForChartGlobal().get(i+1);
+					
 				}
 				
+				else if(i == getPointsForChartGlobal().size() -1 ){
+					point = point + getPointsForChartGlobal().get(i-1);
+					point = point + getPointsForChartGlobal().get(i);
+					point = point + getPointsForChartGlobal().get(i);
 				}
-			if(iterator +3 == getPointsForChartGlobal().size()){
-				break;
-			}
-			if(iterator +2 == getPointsForChartGlobal().size()){
-				break;
-			}
-			if(iterator +1 == getPointsForChartGlobal().size()){
-				break;
-			}
-
-		}
+				else{
+					point = point + getPointsForChartGlobal().get(i-1);
+					point = point + getPointsForChartGlobal().get(i);
+					point = point + getPointsForChartGlobal().get(i+1);
+				}
+				point = point / 3;
+				pointsForChart.add(point);
+				point = 0d;
+				
+				}
+		
 		getPointsForChartGlobal().clear();
 		getPointsForChartGlobal().addAll(pointsForChart);
-		return pointsForChart;
+		avgSpeedForChart.clear();
+		avgSpeedForChart.addAll(pointsForChart);
+		return avgSpeedForChart;
 	}
 	
 	public List <Double> getMedianForChar(){
 		
-		List <Double> pointsForChart = new ArrayList<>();		
+		List <Double> pointsForChart = new ArrayList<>();
+		
+		
 		int iterator = 0;
 		double point = 0d;
-		while(iterator != getPointsForChartGlobal().size()){
+		for(int i = 0; i< getPointsForChartGlobal().size() ; i++){
 			List<Double> medianSortedList = new ArrayList<Double>();
-			
-			for (int i = 0; i < 3; i++) {
-				
-				
-				 point = point + getPointsForChartGlobal().get(i+iterator);
-				 medianSortedList.add(point);
-				if(i==2){
+				if(i == 0 )
+				{
+					point = point + getPointsForChartGlobal().get(i);
+					medianSortedList.add(point);
+					point = point + getPointsForChartGlobal().get(i);
+					medianSortedList.add(point);
+					point = point + getPointsForChartGlobal().get(i+1);
+					medianSortedList.add(point);
 					
-					Collections.sort(medianSortedList);
-					if (medianSortedList.size() % 2 == 0)
-					    point = (medianSortedList.get(medianSortedList.size()/2) + medianSortedList.get(medianSortedList.size()/2 - 1))/2;
-					else
-						point =  medianSortedList.get(medianSortedList.size()/2);
-					
-					point = point / 3;
-					iterator= iterator + 3;
-					pointsForChart.add(point);
-					point = 0d;
-					medianSortedList.clear();
 				}
 				
+				else if(i == getPointsForChartGlobal().size() -1 ){
+					point = point + getPointsForChartGlobal().get(i-1);
+					medianSortedList.add(point);
+					point = point + getPointsForChartGlobal().get(i);
+					medianSortedList.add(point);
+					point = point + getPointsForChartGlobal().get(i);
+					medianSortedList.add(point);
 				}
-			if(iterator +3 == getPointsForChartGlobal().size()){
-				break;
-			}
-			if(iterator +2 == getPointsForChartGlobal().size()){
-				break;
-			}
-			if(iterator +1 == getPointsForChartGlobal().size()){
-				break;
-			}
-
-		}
-		
-		
+				else{
+					point = point + getPointsForChartGlobal().get(i-1);
+					medianSortedList.add(point);
+					point = point + getPointsForChartGlobal().get(i);
+					medianSortedList.add(point);
+					point = point + getPointsForChartGlobal().get(i+1);
+					medianSortedList.add(point);
+				}
+				Collections.sort(medianSortedList);
+				if (medianSortedList.size() % 2 == 0)
+				    point = (medianSortedList.get(medianSortedList.size()/2) + medianSortedList.get(medianSortedList.size()/2 - 1))/2;
+				else
+					point =  medianSortedList.get(medianSortedList.size()/2);			
+				pointsForChart.add(point);
+				point = 0d;
+				medianSortedList.clear();
+				}			
 		
 		getPointsForChartGlobal().clear();
 		getPointsForChartGlobal().addAll(pointsForChart);

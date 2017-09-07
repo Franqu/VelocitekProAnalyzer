@@ -97,7 +97,6 @@ public class MainWindow {
 	private final Color colorMapMarkerCircle = new Color (0x000000);
 	private DataAnalysis dataAnalysis = new DataAnalysis();
 	final JFileChooser fileChooser = new JFileChooser();
-	static Double exponentation = 0d;
 	public static MapPanel getMapPanel() {
 		return mapPanel;
 	}
@@ -459,7 +458,6 @@ public class MainWindow {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				exponentation++;
 				int iterator = 1;
 				JDBCPointDao.dataSet.removeAllSeries();
 				JDBCPointDao.speedTimeSeries.clear();
@@ -511,7 +509,7 @@ public class MainWindow {
 		                x = Double.NaN;                  
 		            }
 
-		            x = Math.round(x) * Math.pow(3, exponentation);
+		            x = Math.round(x);
 		            
 		            if(SwingUtilities.isLeftMouseButton(event.getTrigger()) && event.getTrigger().isShiftDown()){            	
 		           	 for (PointDto cord : JDBCPointDao.points) {
@@ -578,7 +576,7 @@ public class MainWindow {
 				            double y = DatasetUtilities.findYValue(plot.getDataset(), 0, x);
 				            xCrosshair.setValue(x);
 				            yCrosshair.setValue(y);	 
-				            x = Math.round(x) * Math.pow(3,exponentation);
+				            x = Math.round(x);
 				            for (PointDto cord : JDBCPointDao.points) {
 				            	
 			            	if(cord.getPointID() == x){
@@ -605,7 +603,11 @@ public class MainWindow {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				exponentation++;
+				 int howManyTimes = selectHowManyTimes();
+				for (int i = 0; i < howManyTimes; i++) {
+					
+				
+				
 				int iterator = 1;
 				JDBCPointDao.dataSet.removeAllSeries();
 				JDBCPointDao.speedTimeSeries.clear();
@@ -657,7 +659,7 @@ public class MainWindow {
 		                x = Double.NaN;                  
 		            }
 
-		            x = Math.round(x) * Math.pow(3, exponentation);
+		            x = Math.round(x);
 		            
 		            if(SwingUtilities.isLeftMouseButton(event.getTrigger()) && event.getTrigger().isShiftDown()){            	
 		           	 for (PointDto cord : JDBCPointDao.points) {
@@ -724,7 +726,7 @@ public class MainWindow {
 				            double y = DatasetUtilities.findYValue(plot.getDataset(), 0, x);
 				            xCrosshair.setValue(x);
 				            yCrosshair.setValue(y);	 
-				            x = Math.round(x) * Math.pow(3,exponentation);
+				            x = Math.round(x);
 				            for (PointDto cord : JDBCPointDao.points) {
 				            	
 			            	if(cord.getPointID() == x){
@@ -742,7 +744,9 @@ public class MainWindow {
 					
 				});
 			}
+			}
 		});
+	    
 		
 		    
 	    //Add listener to components that can bring up popup menus.
@@ -900,7 +904,6 @@ public class MainWindow {
 	
 	
 	private void loadDataFromDB(){
-		exponentation = 0d;
 		mapPanel.map().removeAllMapPolygons();
 		mapPanel.map().removeAllMapMarkers();
 		mapPanel.map().removeAllMapRectangles();
@@ -1072,6 +1075,7 @@ public class MainWindow {
 	    }
 	    if(!JDBCPointDao.points.isEmpty() ){
 	    	int iterator = 0;
+	    	dataAnalysis.getPointsForChartGlobal().clear();
 	    	for (PointDto pointDto : JDBCPointDao.points) {
 		    	dataAnalysis.getPointsForChartGlobal().add(iterator, pointDto.getPointSpeed());
 		    	iterator++;
@@ -1301,6 +1305,20 @@ public class MainWindow {
 		return s;
 
 }
+	
+	private int selectHowManyTimes(){
+		Object[] valuesOfTimes = {1,2,3,4,5,6,7,8,9,10};
+		int number = (int)JOptionPane.showInputDialog(
+			    frame,
+			    "Choose end time:\n"
+			    + "hh:mm",
+			    "Set end time",
+			    JOptionPane.PLAIN_MESSAGE,
+			    null,
+			    valuesOfTimes,
+			    null);
+			return number;
+	}
 	
 	
 	private void backData(){

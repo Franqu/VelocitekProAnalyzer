@@ -109,6 +109,7 @@ public class MainWindow {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		Locale.setDefault(Locale.ENGLISH);
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -1115,7 +1116,24 @@ public class MainWindow {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		jdbcPointDao.select();
+		JDBCPointDao jdbcPointDao2 = new JDBCPointDao();
+		jdbcPointDao2.getConnection(dbName);
+		jdbcPointDao2.deleteVacuum();
+		for (PointDto pointDto : JDBCPointDao.points) {
+			jdbcPointDao2.insert(pointDto);
+			}
+		try {
+			jdbcPointDao2.connection.commit();
+		} catch (SQLException e1) {
+			statusLabel.setText("There was an error during deleting, aborted");
+			e1.printStackTrace();
+		}
+		
 		jdbcPointDao.closeConnection();
+		jdbcPointDao2.closeConnection();
+		
+		
 	}
 	
 	private void deleteAllButNotSelected(){
@@ -1153,6 +1171,22 @@ public class MainWindow {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
+			jdbcPointDao.select();
+			JDBCPointDao jdbcPointDao2 = new JDBCPointDao();
+			jdbcPointDao2.getConnection(dbName);
+			jdbcPointDao2.deleteVacuum();
+			for (PointDto pointDto : JDBCPointDao.points) {
+				jdbcPointDao2.insert(pointDto);
+				}
+			try {
+				jdbcPointDao2.connection.commit();
+			} catch (SQLException e1) {
+				statusLabel.setText("There was an error during deleting, aborted");
+				e1.printStackTrace();
+			}
+			
+			jdbcPointDao.closeConnection();
+			jdbcPointDao2.closeConnection();
 			jdbcPointDao.closeConnection();
 		}
 		

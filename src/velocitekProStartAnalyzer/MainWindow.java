@@ -73,7 +73,7 @@ public class MainWindow {
 	static JSplitPane tableGraphMapSplitPanel;
 	static JLabel dataAnalysisLabel = new JLabel();
 	private JLabel statusLabel = new JLabel();
-	private JLabel copyrightLabel = new JLabel(" Velocitek Prostart Analyser v.1.2 - Copyright (C) 2017 Maciej Jêdrzejko");	
+	private JLabel copyrightLabel = new JLabel(" Velocitek Prostart Analyser v.1.21 - Copyright (C) 2017 Maciej Jêdrzejko");	
 	private JPanel graphPanel = new JPanel(new BorderLayout());
 	private JMenuItem btnDeleteSelected = new JMenuItem();
 	private JMenuItem btnSetStartTime = new JMenuItem();
@@ -431,7 +431,7 @@ public class MainWindow {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JOptionPane.showMessageDialog(
-						frame, "Velocitek Prostart Analyser v.1.2 - Copyright (C) 2017 Maciej Jêdrzejko"
+						frame, "Velocitek Prostart Analyser v.1.21 - Copyright (C) 2017 Maciej Jêdrzejko"
 								+ "\n\nThis program is free software: you can redistribute it and/or modify"
 								+ "\nit under the terms of the GNU General Public License as published by "
 								+ "\nthe Free Software Foundation, either version 3 of the License, or"

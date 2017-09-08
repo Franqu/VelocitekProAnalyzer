@@ -17,7 +17,7 @@ public class DataAnalysis {
 	private Double avgSpeed;
 	private Double medianSpeed;
 	private List <Double> avgSpeedForChart = new ArrayList<>();
-	
+	private List <Double> medianForChart = new ArrayList<>();
 	private List <Double> pointsForChartGlobal = new ArrayList<>();
 	
 	public String elapsedRaceTime(String startDateString, String endDateString){
@@ -174,7 +174,7 @@ public class DataAnalysis {
 		return avgSpeedForChart;
 	}
 	
-	public List <Double> getMedianForChar(){
+	public List <Double> getMedianForChart(){
 		
 		List <Double> pointsForChart = new ArrayList<>();
 		
@@ -232,7 +232,9 @@ public class DataAnalysis {
 		
 		getPointsForChartGlobal().clear();
 		getPointsForChartGlobal().addAll(pointsForChart);
-		return pointsForChart;
+		medianForChart.clear();
+		medianForChart.addAll(pointsForChart);
+		return medianForChart;
 	}
 
 	public void setAvgSpeedForChart(List<Double> avgSpeedForChart) {
@@ -245,6 +247,10 @@ public class DataAnalysis {
 
 	public void setPointsForChartGlobal(List <Double> pointsForChartGlobal) {
 		this.pointsForChartGlobal = pointsForChartGlobal;
+	}
+
+	public void setMedianForChart(List <Double> medianForChart) {
+		this.medianForChart = medianForChart;
 	}
 	
 	

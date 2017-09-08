@@ -29,6 +29,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -61,7 +62,8 @@ public class MainWindow {
 	
 	private JFrame frame;
 	private JButton btnLoadRouteData;
-	private JButton btnSaveAsVCC;
+	private JMenuItem btnSaveAsVCC = new JMenuItem("Save Database as VCC");
+	private JMenuItem btnSaveAsVCCForChart = new JMenuItem("Save as VCC");
 	private JButton btnShowFileDialogButton = new JButton("Open File");
 	//private JDBCPointDao jdbcPointDao; 
 	static JTable pointTable = new JTable();
@@ -80,13 +82,20 @@ public class MainWindow {
 	private String filePath;
 	private JMenuItem btnDeleteAllButNotSelected = new JMenuItem();
 	private JMenuItem btnSetStartFinishMapMarkers = new JMenuItem();
-	private JMenuItem btnSaveMapAsPng = new JMenuItem();
-	private JMenuItem btnSaveTableAsPng = new JMenuItem();
+	private JMenuItem btnSaveMapAsPng = new JMenuItem("Save Map as PNG");
+	private JMenuItem btnSaveMapAsPngForChart = new JMenuItem("Save Map as PNG");
+	private JMenuItem btnSaveTableAsPng = new JMenuItem("Save Table as PNG");
+	private JMenuItem btnSaveTableAsPngForChart = new JMenuItem("Save Table as PNG");
+	private JMenuItem btnSaveChartAsPng = new JMenuItem("Save Chart as PNG");
+	private JMenuItem btnSaveChartAsPngForChart = new JMenuItem("Save Chart as PNG");
+	
 	private JMenuItem btnBackData = new JMenuItem();
 	private JMenuItem btnAbout = new JMenuItem("About");
 	private JMenuItem btnAvgSpeedChart = new JMenuItem("Average Speed Data");
 	private JMenuItem btnMedianSpeedChart = new JMenuItem("Median Speed Data");
 	private JMenuItem btnResetSpeedChart = new JMenuItem("Redraw");
+	private JMenu btnMenuSaveSubmenu = new JMenu("Save");	
+	private JMenu btnMenuSaveSubmenuForChart = new JMenu("Save");
 	private static MapPanel mapPanel = new MapPanel();
 	private Crosshair xCrosshair;
     private Crosshair yCrosshair;
@@ -277,9 +286,7 @@ public class MainWindow {
 			}
 		});
 		
-		btnSaveAsVCC = new JButton("Save as VCC");
-		btnPanel.add(btnSaveAsVCC);
-		if(JDBCPointDao.points.isEmpty()){btnSaveAsVCC.setEnabled(false);}
+		
 		
 		
 						
@@ -370,6 +377,7 @@ public class MainWindow {
 		
 		btnSetStartTime = new JMenuItem("Set Race Time");
 		popup.add(btnSetStartTime);
+	
 		btnSetStartTime.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -390,6 +398,7 @@ public class MainWindow {
 		
 		btnSetStartFinishMapMarkers = new JMenuItem("Show Start Finish");
 		popup.add(btnSetStartFinishMapMarkers);
+		popup.addSeparator();
 		btnSetStartFinishMapMarkers.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -397,14 +406,21 @@ public class MainWindow {
 			}
 		});
 		
+		
+		btnMenuSaveSubmenu.add(btnSaveChartAsPng);
 		btnSaveMapAsPng = new JMenuItem("Save Map as PNG");
-		popup.add(btnSaveMapAsPng);
-		
-		
+		btnMenuSaveSubmenu.add(btnSaveMapAsPng);
 		btnSaveTableAsPng = new JMenuItem("Save Table as PNG");
-		popup.add(btnSaveTableAsPng);
+		btnMenuSaveSubmenu.add(btnSaveTableAsPng);
+		btnMenuSaveSubmenu.add(btnSaveMapAsPng);
+		btnMenuSaveSubmenu.addSeparator();
+		btnSaveAsVCC = new JMenuItem("Save as VCC");
+		btnMenuSaveSubmenu.add(btnSaveAsVCC);
+		if(JDBCPointDao.points.isEmpty()){btnSaveAsVCC.setEnabled(false);
+		btnSaveAsVCCForChart.setEnabled(false);}
 		btnBackData = new JMenuItem("Back");
 		popup.add(btnBackData);
+		popup.addSeparator();
 		
 		
 		
@@ -414,6 +430,7 @@ public class MainWindow {
 		
 		JMenuItem btnResizeWindow = new JMenuItem("Resize Windows");
 		popup.add(btnResizeWindow);
+		popup.addSeparator();
 		btnResizeWindow.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -425,7 +442,10 @@ public class MainWindow {
 				
 			}
 		});
+		popup.add(btnMenuSaveSubmenu);
+		popup.addSeparator();
 		popup.add(btnAbout);
+		
 		
 		btnAbout.addActionListener(new ActionListener() {
 			
@@ -446,6 +466,7 @@ public class MainWindow {
 								);				
 			}
 		});
+		
 		btnResetSpeedChart.addActionListener(new ActionListener() {
 			
 			@Override
@@ -453,6 +474,7 @@ public class MainWindow {
 				loadDataFromDB();				
 			}
 		});
+	
 		btnMedianSpeedChart.addActionListener(new ActionListener() {
 			
 
@@ -464,139 +486,14 @@ public class MainWindow {
 				int iterator = 1;
 				JDBCPointDao.dataSet.removeAllSeries();
 				JDBCPointDao.speedTimeSeries.clear();
-				for (Double medianSpeed : dataAnalysis.getMedianForChar()) {					
+				for (Double medianSpeed : dataAnalysis.getMedianForChart()) {					
 					JDBCPointDao.speedTimeSeries.add(iterator,medianSpeed);
 					iterator++;
 				}
 				JDBCPointDao.dataSet.addSeries(JDBCPointDao.speedTimeSeries);
+				createChartPanel();
 				
-				XYSeriesCollection dataset = JDBCPointDao.dataSet;
-			    JFreeChart chart = createChart(dataset);
-			    ChartPanel chartPanel = new ChartPanel(chart);
-			    chartPanel.setMinimumDrawWidth( 0 );
-			    chartPanel.setMinimumDrawHeight( 0 );
-			    chartPanel.setMaximumDrawWidth( 1920 );
-			    chartPanel.setMaximumDrawHeight( 1200 );
-			    chartPanel.getPopupMenu().add(btnAvgSpeedChart);
-			    chartPanel.getPopupMenu().add(btnMedianSpeedChart);
-			    chartPanel.getPopupMenu().add(btnResetSpeedChart);
-			    
-			    CrosshairOverlay crosshairOverlay = new CrosshairOverlay();
-		        xCrosshair = new Crosshair(Double.NaN, Color.GRAY, 
-		                new BasicStroke(0f));
-		        xCrosshair.setLabelVisible(true);
-		        yCrosshair = new Crosshair(Double.NaN, Color.GRAY, 
-		                new BasicStroke(0f));
-		    	yCrosshair.setLabelVisible(true);
-		        crosshairOverlay.addDomainCrosshair(xCrosshair);
-		        crosshairOverlay.addRangeCrosshair(yCrosshair);
-		        chartPanel.addOverlay(crosshairOverlay);
-			    graphPanel.removeAll();
-			    graphPanel.add(chartPanel, BorderLayout.CENTER);
-			    graphPanel.revalidate();
-			    graphPanel.repaint();
-			    graphMapSplitPanel.revalidate();
-			    
-			    chartPanel.addChartMouseListener(new ChartMouseListener(){
-
-					@Override
-					public void chartMouseClicked(ChartMouseEvent event) {  
-					Rectangle2D dataArea = chartPanel.getScreenDataArea();
-		            JFreeChart chart = event.getChart();
-		            XYPlot plot = (XYPlot) chart.getPlot();
-		            ValueAxis xAxis = plot.getDomainAxis();
-		            double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, 
-		                    RectangleEdge.BOTTOM);
-		            // make the crosshairs disappear if the mouse is out of range
-		            if (!xAxis.getRange().contains(x)) { 
-		                x = Double.NaN;                  
-		            }
-
-		            x = Math.round(x);
-		            
-		            if(SwingUtilities.isLeftMouseButton(event.getTrigger()) && event.getTrigger().isShiftDown()){            	
-		           	 for (PointDto cord : JDBCPointDao.points) {
-		            		{
-		     				if(cord.getPointID() == x)
-		     				{            	
-		            	if(pointTable.getSelectionModel() == null){
-							for (int i=0; i < pointTable.getModel().getRowCount(); i++) {
-								if(pointTable.getModel().getValueAt(i, 0).equals(cord.getPointID()))
-								{
-									pointTable.setRowSelectionInterval(i,i);
-								}
-							}    			
-						}
-						else{
-							for (int i=0; i < pointTable.getModel().getRowCount(); i++) {
-								if(pointTable.getModel().getValueAt(i, 0).equals(cord.getPointID()))
-								{
-									pointTable.addRowSelectionInterval(pointTable.getSelectedRow(),i);
-								}
-							}
-							} 
-						pointTable.scrollRectToVisible(pointTable.getCellRect(pointTable.getSelectedRow(), 0, true));
-		     				}
-		            		}
-		           	 }
-		            }            
-		            else{   
-			       	 for (PointDto cord : JDBCPointDao.points) {
-				       		{
-								if(cord.getPointID() == x)
-								{
-									if(pointTable.getSelectionModel() != null){
-										pointTable.getSelectionModel().clearSelection();
-									}
-									for (int i=0; i < pointTable.getModel().getRowCount(); i++) {
-										if(pointTable.getModel().getValueAt(i, 0).equals(cord.getPointID()))
-										{
-											pointTable.setRowSelectionInterval(i,i);
-										}
-									}    						
-									pointTable.scrollRectToVisible(pointTable.getCellRect(pointTable.getSelectedRow(), 0, true));
-									//MainWindow.pointTable.revalidate();    						
-								}   						
-				   			}  
-				            
-				            }
-		            }
 				}
-
-					@Override
-					public void chartMouseMoved(ChartMouseEvent event) {
-						
-				            Rectangle2D dataArea = chartPanel.getScreenDataArea();
-				            JFreeChart chart = event.getChart();
-				            XYPlot plot = (XYPlot) chart.getPlot();
-				            ValueAxis xAxis = plot.getDomainAxis();
-				            double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, 
-				                    RectangleEdge.BOTTOM);
-				            // make the crosshairs disappear if the mouse is out of range
-				            if (!xAxis.getRange().contains(x)) { 
-				                x = Double.NaN;                  
-				            }
-				            double y = DatasetUtilities.findYValue(plot.getDataset(), 0, x);
-				            xCrosshair.setValue(x);
-				            yCrosshair.setValue(y);	 
-				            x = Math.round(x);
-				            for (PointDto cord : JDBCPointDao.points) {
-				            	
-			            	if(cord.getPointID() == x){
-			            		mapPanel.map().removeMapMarker(mapPanel.getMapPoint());
-				            	mapPanel.setMapPoint(new MapMarkerDot(null,  null, cord.getPointLatidude(),cord.getPointLongtidude()));             
-				            	mapPanel.setMapPoint(mapPanel.getMapPoint());
-				            	mapPanel.getMapPoint().setColor(colorMapMarkerCircle);
-				            	mapPanel.getMapPoint().setBackColor(colorMapMarkerHover);
-				            	mapPanel.map().addMapMarker(mapPanel.getMapPoint());
-			            	}
-			            	
-				            }
-					}
-					
-					
-				});
-			}
 			}
 		});
 		
@@ -608,10 +505,7 @@ public class MainWindow {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				 int howManyTimes = selectHowManyTimes();
-				for (int i = 0; i < howManyTimes; i++) {
-					
-				
-				
+				for (int i = 0; i < howManyTimes; i++) {					
 				int iterator = 1;
 				JDBCPointDao.dataSet.removeAllSeries();
 				JDBCPointDao.speedTimeSeries.clear();
@@ -619,137 +513,13 @@ public class MainWindow {
 					JDBCPointDao.speedTimeSeries.add(iterator,avgSpeed);
 					iterator++;
 				}
-				JDBCPointDao.dataSet.addSeries(JDBCPointDao.speedTimeSeries);
-				
-				XYSeriesCollection dataset = JDBCPointDao.dataSet;
-			    JFreeChart chart = createChart(dataset);
-			    ChartPanel chartPanel = new ChartPanel(chart);
-			    chartPanel.setMinimumDrawWidth( 0 );
-			    chartPanel.setMinimumDrawHeight( 0 );
-			    chartPanel.setMaximumDrawWidth( 1920 );
-			    chartPanel.setMaximumDrawHeight( 1200 );
-			    chartPanel.getPopupMenu().add(btnAvgSpeedChart);
-			    chartPanel.getPopupMenu().add(btnMedianSpeedChart);
-			    chartPanel.getPopupMenu().add(btnResetSpeedChart);
-			    
-			    CrosshairOverlay crosshairOverlay = new CrosshairOverlay();
-		        xCrosshair = new Crosshair(Double.NaN, Color.GRAY, 
-		                new BasicStroke(0f));
-		        xCrosshair.setLabelVisible(true);
-		        yCrosshair = new Crosshair(Double.NaN, Color.GRAY, 
-		                new BasicStroke(0f));
-		    	yCrosshair.setLabelVisible(true);
-		        crosshairOverlay.addDomainCrosshair(xCrosshair);
-		        crosshairOverlay.addRangeCrosshair(yCrosshair);
-		        chartPanel.addOverlay(crosshairOverlay);
-			    graphPanel.removeAll();
-			    graphPanel.add(chartPanel, BorderLayout.CENTER);
-			    graphPanel.revalidate();
-			    graphPanel.repaint();
-			    graphMapSplitPanel.revalidate();
-			    
-			    chartPanel.addChartMouseListener(new ChartMouseListener(){
-
-					@Override
-					public void chartMouseClicked(ChartMouseEvent event) {  
-					Rectangle2D dataArea = chartPanel.getScreenDataArea();
-		            JFreeChart chart = event.getChart();
-		            XYPlot plot = (XYPlot) chart.getPlot();
-		            ValueAxis xAxis = plot.getDomainAxis();
-		            double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, 
-		                    RectangleEdge.BOTTOM);
-		            // make the crosshairs disappear if the mouse is out of range
-		            if (!xAxis.getRange().contains(x)) { 
-		                x = Double.NaN;                  
-		            }
-
-		            x = Math.round(x);
-		            
-		            if(SwingUtilities.isLeftMouseButton(event.getTrigger()) && event.getTrigger().isShiftDown()){            	
-		           	 for (PointDto cord : JDBCPointDao.points) {
-		            		{
-		     				if(cord.getPointID() == x)
-		     				{            	
-		            	if(pointTable.getSelectionModel() == null){
-							for (int i=0; i < pointTable.getModel().getRowCount(); i++) {
-								if(pointTable.getModel().getValueAt(i, 0).equals(cord.getPointID()))
-								{
-									pointTable.setRowSelectionInterval(i,i);
-								}
-							}    			
-						}
-						else{
-							for (int i=0; i < pointTable.getModel().getRowCount(); i++) {
-								if(pointTable.getModel().getValueAt(i, 0).equals(cord.getPointID()))
-								{
-									pointTable.addRowSelectionInterval(pointTable.getSelectedRow(),i);
-								}
-							}
-							} 
-						pointTable.scrollRectToVisible(pointTable.getCellRect(pointTable.getSelectedRow(), 0, true));
-		     				}
-		            		}
-		           	 }
-		            }            
-		            else{   
-			       	 for (PointDto cord : JDBCPointDao.points) {
-				       		{
-								if(cord.getPointID() == x)
-								{
-									if(pointTable.getSelectionModel() != null){
-										pointTable.getSelectionModel().clearSelection();
-									}
-									for (int i=0; i < pointTable.getModel().getRowCount(); i++) {
-										if(pointTable.getModel().getValueAt(i, 0).equals(cord.getPointID()))
-										{
-											pointTable.setRowSelectionInterval(i,i);
-										}
-									}    						
-									pointTable.scrollRectToVisible(pointTable.getCellRect(pointTable.getSelectedRow(), 0, true));
-									//MainWindow.pointTable.revalidate();    						
-								}   						
-				   			}  
-				            
-				            }
-		            }
+				JDBCPointDao.dataSet.addSeries(JDBCPointDao.speedTimeSeries);				
+				createChartPanel();
 				}
-
-					@Override
-					public void chartMouseMoved(ChartMouseEvent event) {
-						
-				            Rectangle2D dataArea = chartPanel.getScreenDataArea();
-				            JFreeChart chart = event.getChart();
-				            XYPlot plot = (XYPlot) chart.getPlot();
-				            ValueAxis xAxis = plot.getDomainAxis();
-				            double x = xAxis.java2DToValue(event.getTrigger().getX(), dataArea, 
-				                    RectangleEdge.BOTTOM);
-				            // make the crosshairs disappear if the mouse is out of range
-				            if (!xAxis.getRange().contains(x)) { 
-				                x = Double.NaN;                  
-				            }
-				            double y = DatasetUtilities.findYValue(plot.getDataset(), 0, x);
-				            xCrosshair.setValue(x);
-				            yCrosshair.setValue(y);	 
-				            x = Math.round(x);
-				            for (PointDto cord : JDBCPointDao.points) {
-				            	
-			            	if(cord.getPointID() == x){
-			            		mapPanel.map().removeMapMarker(mapPanel.getMapPoint());
-				            	mapPanel.setMapPoint(new MapMarkerDot(null,  null, cord.getPointLatidude(),cord.getPointLongtidude()));             
-				            	mapPanel.setMapPoint(mapPanel.getMapPoint());
-				            	mapPanel.getMapPoint().setColor(colorMapMarkerCircle);
-				            	mapPanel.getMapPoint().setBackColor(colorMapMarkerHover);
-				            	mapPanel.map().addMapMarker(mapPanel.getMapPoint());
-			            	}
-			            	
-				            }
-					}
-					
-					
-				});
-			}
 			}
 		});
+	    
+	   
 	    
 		
 		    
@@ -762,6 +532,7 @@ public class MainWindow {
 		mapPanel.addMouseListener(popupListener);    
 		saveMapAsPng(mapPanel);
 		saveTableAsPng(tableContainer);
+		
 		saveNewVCC();
 		backData();
 		
@@ -814,6 +585,28 @@ public class MainWindow {
 			       }
 			}
 		});
+	       
+	       btnSaveMapAsPngForChart.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					fileChooser.setDialogTitle("Specify a file to save");   
+					 int userSelection = fileChooser.showSaveDialog(frame);
+					 BufferedImage bufImage = new BufferedImage(panel.getSize().width, panel.getSize().height,BufferedImage.TYPE_INT_RGB);
+				       panel.paint(bufImage.createGraphics());
+				       if (userSelection == JFileChooser.APPROVE_OPTION) {
+				           File fileToSave = new File(fileChooser.getSelectedFile()+".png");
+				           System.out.println("Save as file: " + fileToSave.getAbsolutePath());
+				           try{
+				   	    	fileToSave.createNewFile();
+				   	        ImageIO.write(bufImage, "png", fileToSave);
+				   	        statusLabel.setText("Map Screenshot Saved as: "+ fileToSave.getName());
+				   	    }catch(Exception ex){
+				   	    	statusLabel.setText("There was an error during save, aborted");
+				   	    }
+				       }
+				}
+			});
 	      
 	       
 	      // File imageFile = new File("C:\\MJ_NETCLINIC\\asd.png");
@@ -821,11 +614,12 @@ public class MainWindow {
 	}
 	
 	private void saveNewVCC(){
-	        SaveXMLFile saveXMLFile = new SaveXMLFile();
+	       
 	        btnSaveAsVCC.addActionListener(new ActionListener(){
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
+					SaveXMLFile saveXMLFile = new SaveXMLFile();
 					fileChooser.setDialogTitle("Specify a file to save");   
 					 int userSelection = fileChooser.showSaveDialog(frame);
 				        
@@ -842,7 +636,30 @@ public class MainWindow {
 				       }
 				}
 	        });
+	        btnSaveAsVCCForChart.addActionListener(new ActionListener(){
+
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					SaveXMLFile saveXMLFile = new SaveXMLFile();
+					fileChooser.setDialogTitle("Specify a file to save");   
+					 int userSelection = fileChooser.showSaveDialog(frame);
+				        
+				       if (userSelection == JFileChooser.APPROVE_OPTION) {
+				           File fileToSave = new File(fileChooser.getSelectedFile()+".vcc");
+				           System.out.println("Save as file: " + fileToSave.getAbsolutePath());
+				           try{
+				   	    	fileToSave.createNewFile();
+				   	    	saveXMLFile.saveToVCC(fileToSave.getAbsolutePath());
+				   	    	statusLabel.setText("Saved data as: " + fileToSave.getName() );
+				   	    }catch(Exception ex){
+				   	    	statusLabel.setText("There was an error during save, aborted");
+				   	    }
+				       }
+				}
+	        });
+	        
 	}
+	
 	
 	private void openFile(){		   
 		 
@@ -900,37 +717,106 @@ public class MainWindow {
 			       }
 			}
 		});
+	       btnSaveTableAsPngForChart.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					fileChooser.setDialogTitle("Specify a file to save");   
+					int userSelection = fileChooser.showSaveDialog(frame);
+					BufferedImage bufImage = new BufferedImage(panel.getSize().width, panel.getSize().height,BufferedImage.TYPE_INT_RGB);
+					panel.paint(bufImage.createGraphics());
+				       
+				       if (userSelection == JFileChooser.APPROVE_OPTION) {
+				           File fileToSave = new File(fileChooser.getSelectedFile()+".png");
+				           System.out.println("Save as file: " + fileToSave.getAbsolutePath());
+				           try{
+				   	    	fileToSave.createNewFile();
+				   	        ImageIO.write(bufImage, "png", fileToSave);
+				   	        statusLabel.setText("Table Screenshot Saved as: "+ fileToSave.getName() );
+				   	    }catch(Exception ex){
+				   	    	statusLabel.setText("There was an error during saving");
+				   	    }
+				          
+				       }
+				}
+			});
+	       
+	}
+	
+	private void saveChartAsPng(ChartPanel panel){
+	       btnSaveChartAsPng.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				fileChooser.setDialogTitle("Specify a file to save");   
+				int userSelection = fileChooser.showSaveDialog(frame);
+				BufferedImage bufImage = new BufferedImage(panel.getSize().width, panel.getSize().height,BufferedImage.TYPE_INT_RGB);
+				panel.paint(bufImage.createGraphics());
+			       
+			       if (userSelection == JFileChooser.APPROVE_OPTION) {
+			           File fileToSave = new File(fileChooser.getSelectedFile()+".png");
+			           System.out.println("Save as file: " + fileToSave.getAbsolutePath());
+			           try{
+			   	    	fileToSave.createNewFile();
+			   	        ImageIO.write(bufImage, "png", fileToSave);
+			   	        statusLabel.setText("Chart Screenshot Saved as: "+ fileToSave.getName() );
+			   	    }catch(Exception ex){
+			   	    	statusLabel.setText("There was an error during saving");
+			   	    }
+			          
+			       }
+			}
+		});
+	       btnSaveChartAsPngForChart.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					fileChooser.setDialogTitle("Specify a file to save");   
+					int userSelection = fileChooser.showSaveDialog(frame);
+					BufferedImage bufImage = new BufferedImage(panel.getSize().width, panel.getSize().height,BufferedImage.TYPE_INT_RGB);
+					panel.paint(bufImage.createGraphics());
+				       
+				       if (userSelection == JFileChooser.APPROVE_OPTION) {
+				           File fileToSave = new File(fileChooser.getSelectedFile()+".png");
+				           System.out.println("Save as file: " + fileToSave.getAbsolutePath());
+				           try{
+				   	    	fileToSave.createNewFile();
+				   	        ImageIO.write(bufImage, "png", fileToSave);
+				   	        statusLabel.setText("Chart Screenshot Saved as: "+ fileToSave.getName() );
+				   	    }catch(Exception ex){
+				   	    	statusLabel.setText("There was an error during saving");
+				   	    }
+				          
+				       }
+				}
+			});
 	       
 	}
 	
 	
-
-	
-	
-	private void loadDataFromDB(){
-		mapPanel.map().removeAllMapPolygons();
-		mapPanel.map().removeAllMapMarkers();
-		mapPanel.map().removeAllMapRectangles();
-		JDBCPointDao jdbcPointDao = new JDBCPointDao();
-		jdbcPointDao.getConnection(dbName);
-		jdbcPointDao.select();
-		pointTable.setModel(buildTableModel(JDBCPointDao.points));
-		jdbcPointDao.closeConnection();
-		
-		MapPolyline routePolyline = new MapPolyline(JDBCPointDao.mapPointsListCoords);
-		mapPanel.map().addMapPolygon(routePolyline);
-		mapPanel.revalidate();
+	private void createChartPanel(){
 		XYSeriesCollection dataset = JDBCPointDao.dataSet;
 	    JFreeChart chart = createChart(dataset);
-	    ChartPanel chartPanel = new ChartPanel(chart);
+	    ChartPanel chartPanel = new ChartPanel(chart,true, false, false, true, false);
 	    chartPanel.setMinimumDrawWidth( 0 );
 	    chartPanel.setMinimumDrawHeight( 0 );
 	    chartPanel.setMaximumDrawWidth( 1920 );
 	    chartPanel.setMaximumDrawHeight( 1200 );
+	    chartPanel.getPopupMenu().addSeparator();
 	    chartPanel.getPopupMenu().add(btnAvgSpeedChart);
 	    chartPanel.getPopupMenu().add(btnMedianSpeedChart);
-	    chartPanel.getPopupMenu().add(btnResetSpeedChart);
-
+		chartPanel.getPopupMenu().add(btnResetSpeedChart);
+		chartPanel.getPopupMenu().addSeparator();
+		chartPanel.getPopupMenu().add(btnMenuSaveSubmenuForChart);
+		
+		if(JDBCPointDao.points.isEmpty()){btnSaveAsVCC.setEnabled(false);}
+		saveChartAsPng(chartPanel);
+		
+		btnMenuSaveSubmenuForChart.add(btnSaveChartAsPngForChart);
+		btnMenuSaveSubmenuForChart.add(btnSaveTableAsPngForChart);
+		btnMenuSaveSubmenuForChart.add(btnSaveMapAsPngForChart);
+		btnMenuSaveSubmenuForChart.addSeparator();
+		btnMenuSaveSubmenuForChart.add(btnSaveAsVCC);
 	    chartPanel.addChartMouseListener(new ChartMouseListener(){
 
 			@Override
@@ -1058,8 +944,27 @@ public class MainWindow {
 	    graphPanel.revalidate();
 	    graphPanel.repaint();
 	    graphMapSplitPanel.revalidate();
+	}
+	
+	
+	private void loadDataFromDB(){
+		mapPanel.map().removeAllMapPolygons();
+		mapPanel.map().removeAllMapMarkers();
+		mapPanel.map().removeAllMapRectangles();
+		JDBCPointDao jdbcPointDao = new JDBCPointDao();
+		jdbcPointDao.getConnection(dbName);
+		jdbcPointDao.select();
+		pointTable.setModel(buildTableModel(JDBCPointDao.points));
+		jdbcPointDao.closeConnection();
+		
+		MapPolyline routePolyline = new MapPolyline(JDBCPointDao.mapPointsListCoords);
+		mapPanel.map().addMapPolygon(routePolyline);
+		mapPanel.revalidate();
+		createChartPanel();
 	    mapPanel.map().setDisplayToFitMapMarkers();
-	    if(JDBCPointDao.points.isEmpty()){btnSaveAsVCC.setEnabled(false);}
+	    if(JDBCPointDao.points.isEmpty()){
+	    	btnSaveAsVCC.setEnabled(false);
+	    	btnSaveAsVCCForChart.setEnabled(false);}
 	    else{btnSaveAsVCC.setEnabled(true);}
 	    if(getFilePath() != null){btnLoadRouteData.setEnabled(true);}
 	    else{btnLoadRouteData.setEnabled(false);}

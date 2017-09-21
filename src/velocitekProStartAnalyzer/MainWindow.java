@@ -63,7 +63,7 @@ public class MainWindow {
 	private JFrame frame;
 	private JButton btnLoadRouteData;
 	private JMenuItem btnSaveAsVCC = new JMenuItem("Save Database as VCC");
-	private JMenuItem btnSaveAsVCCForChart = new JMenuItem("Save as VCC");
+	private JMenuItem btnSaveAsVCCForChart = new JMenuItem("Save Database as VCC");
 	private JButton btnShowFileDialogButton = new JButton("Open File");
 	//private JDBCPointDao jdbcPointDao; 
 	static JTable pointTable = new JTable();
@@ -414,8 +414,7 @@ public class MainWindow {
 		btnMenuSaveSubmenu.add(btnSaveTableAsPng);
 		btnMenuSaveSubmenu.add(btnSaveMapAsPng);
 		btnMenuSaveSubmenu.addSeparator();
-		btnSaveAsVCC = new JMenuItem("Save as VCC");
-		btnMenuSaveSubmenu.add(btnSaveAsVCC);
+		btnMenuSaveSubmenu.add(btnSaveAsVCCForChart);
 		if(JDBCPointDao.points.isEmpty()){btnSaveAsVCC.setEnabled(false);
 		btnSaveAsVCCForChart.setEnabled(false);}
 		btnBackData = new JMenuItem("Back");
@@ -807,6 +806,7 @@ public class MainWindow {
 	    chartPanel.getPopupMenu().add(btnMedianSpeedChart);
 		chartPanel.getPopupMenu().add(btnResetSpeedChart);
 		chartPanel.getPopupMenu().addSeparator();
+		btnMenuSaveSubmenuForChart = new JMenu("Save");
 		chartPanel.getPopupMenu().add(btnMenuSaveSubmenuForChart);
 		
 		if(JDBCPointDao.points.isEmpty()){btnSaveAsVCC.setEnabled(false);}
@@ -965,7 +965,8 @@ public class MainWindow {
 	    if(JDBCPointDao.points.isEmpty()){
 	    	btnSaveAsVCC.setEnabled(false);
 	    	btnSaveAsVCCForChart.setEnabled(false);}
-	    else{btnSaveAsVCC.setEnabled(true);}
+	    else{btnSaveAsVCC.setEnabled(true);
+	    btnSaveAsVCCForChart.setEnabled(true);}
 	    if(getFilePath() != null){btnLoadRouteData.setEnabled(true);}
 	    else{btnLoadRouteData.setEnabled(false);}
 	    if(JDBCPointDao.pointsOld.isEmpty()){btnBackData.setEnabled(false);}
